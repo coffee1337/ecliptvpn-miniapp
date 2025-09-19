@@ -1,6 +1,23 @@
 // Telegram Mini App: EcliptVPN
 const app = document.getElementById('app');
-const startBtn = document.getElementById('startBtn');
+document.addEventListener('DOMContentLoaded', () => {
+  const startBtn = document.getElementById('startBtn');
+  if (startBtn) {
+    startBtn.onclick = async () => {
+      if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.expand();
+        const user = window.Telegram.WebApp.initDataUnsafe.user;
+        if (user) {
+          await showMainMenu(user);
+        } else {
+          alert('Ошибка авторизации через Telegram.');
+        }
+      } else {
+        alert('Откройте приложение через Telegram.');
+      }
+    };
+  }
+});
 const overlays = document.getElementById('ui-overlays');
 
 async function loadProfile(user) {
