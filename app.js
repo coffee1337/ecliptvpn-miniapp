@@ -10,26 +10,59 @@ async function showMainMenu(user) {
   mainMenu.querySelector('#profileBtn').onclick = () => loadProfile(user);
 }
 // Telegram Mini App: EcliptVPN
+console.log('app.js загружен');
 const app = document.getElementById('app');
-document.addEventListener('DOMContentLoaded', () => {
+
+function attachStartHandler() {
   const startBtn = document.getElementById('startBtn');
-  if (startBtn) {
-    startBtn.onclick = async () => {
-      console.log('Кнопка "Начать" нажата');
+  if (!startBtn) return false;
+  // Удаляем предыдущий обработчик, если был
+  startBtn.onclick = null;
+  startBtn.addEventListener('click', async (e) => {
+    console.log('Кнопка "Начать" нажата');
+    try {
       if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.expand();
-        const user = window.Telegram.WebApp.initDataUnsafe.user;
+        if (typeof window.Telegram.WebApp.expand === 'function') {
+          window.Telegram.WebApp.expand();
+        }
+        const user = window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user;
         if (user) {
           await showMainMenu(user);
         } else {
-          alert('Ошибка авторизации через Telegram.');
+          console.warn('Пользователь не инициирован через Telegram WebApp.');
+          // В режиме разработки можно показать заглушку
+          await showMainMenu({ first_name: 'Тест', id: 0 });
         }
       } else {
-        alert('Откройте приложение через Telegram.');
+        console.warn('Telegram WebApp не доступен. Открыто вне Telegram.');
+        await showMainMenu({ first_name: 'Гость', id: 0 });
       }
-    };
-  }
-});
+    } catch (err) {
+      console.error('Ошибка в обработчике startBtn:', err);
+    }
+  });
+  console.log('Обработчик для #startBtn прикреплён');
+  return true;
+}
+
+// Попытка привязать обработчик немедленно
+if (!attachStartHandler()) {
+  // Если кнопки пока нет в DOM — наблюдаем за изменениями
+  const observer = new MutationObserver((mutations, obs) => {
+    if (attachStartHandler()) {
+      obs.disconnect();
+    }
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  // Тайм-аут для диагностики
+  setTimeout(() => {
+    const btn = document.getElementById('startBtn');
+    if (!btn) {
+      console.warn('Кнопка #startBtn не найдена в DOM спустя 5 секунд');
+    }
+  }, 5000);
+}
 const overlays = document.getElementById('ui-overlays');
 
 async function loadProfile(user) {
