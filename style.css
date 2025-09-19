@@ -46,6 +46,7 @@ body {
   opacity: 0.8;
   margin-bottom: 16px;
 }
+/* Современные кнопки */
 .main-btn {
   background: linear-gradient(90deg, #00e6ff 0%, #0057ff 100%);
   color: #fff;
@@ -56,11 +57,35 @@ body {
   font-weight: 600;
   cursor: pointer;
   box-shadow: 0 4px 24px rgba(0, 230, 255, 0.15);
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.18s cubic-bezier(.4,2,.3,1), box-shadow 0.18s, background 0.3s;
+  position: relative;
+  overflow: hidden;
+  outline: none;
 }
 .main-btn:active {
   transform: scale(0.97);
   box-shadow: 0 2px 12px rgba(0, 230, 255, 0.25);
+  background: linear-gradient(90deg, #0057ff 0%, #00e6ff 100%);
+}
+.main-btn:focus {
+  box-shadow: 0 0 0 2px #00e6ff55;
+}
+.main-btn::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(0,230,255,0.15);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.4s, height 0.4s;
+  z-index: 1;
+}
+.main-btn:active::after {
+  width: 120px;
+  height: 120px;
 }
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(24px); }
@@ -184,23 +209,44 @@ body {
 }
 
 /* Улучшение карточек тарифов */
+/* Современные карточки тарифов */
 .tariff-card {
-  background: #222a3a;
-  border-radius: 18px;
-  box-shadow: 0 2px 16px rgba(0,230,255,0.08);
-  padding: 18px 12px;
-  margin: 12px 0;
+  background: linear-gradient(135deg, #222a3a 60%, #181c2a 100%);
+  border-radius: 20px;
+  box-shadow: 0 2px 16px rgba(0,230,255,0.10);
+  padding: 22px 16px;
+  margin: 16px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  transition: box-shadow 0.3s, transform 0.3s;
+  transition: box-shadow 0.22s, transform 0.22s;
+  position: relative;
+  overflow: hidden;
 }
 .tariff-card:hover {
-  box-shadow: 0 6px 32px rgba(0,230,255,0.18);
-  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 8px 32px rgba(0,230,255,0.22);
+  transform: translateY(-2px) scale(1.04);
+}
+.tariff-card::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(0,230,255,0.08);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.4s, height 0.4s;
+  z-index: 0;
+}
+.tariff-card:active::before {
+  width: 140px;
+  height: 140px;
 }
 .tariff-img {
-  width: 48px;
-  height: 48px;
-  margin-bottom: 8px;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 12px;
+  z-index: 1;
 }

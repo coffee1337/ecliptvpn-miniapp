@@ -3,81 +3,71 @@ const app = document.getElementById('app');
 const startBtn = document.getElementById('startBtn');
 const overlays = document.getElementById('ui-overlays');
 
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  const el = document.getElementById(id);
-  if (el) {
-    el.classList.add('active');
-    el.scrollIntoView({ behavior: 'smooth' });
-  }
-}
-
-// Welcome screen logic
-if (startBtn) {
-  startBtn.addEventListener('click', () => {
-    // Telegram WebApp init
-    if (window.Telegram && window.Telegram.WebApp) {
-      window.Telegram.WebApp.expand();
-      // Авторизация через Telegram
-      const user = window.Telegram.WebApp.initDataUnsafe.user;
-      if (user) {
-        // Показать экран тарифов
-        loadTariffs(user);
-      } else {
-        alert('Ошибка авторизации через Telegram.');
-      }
-    } else {
-      alert('Откройте приложение через Telegram.');
-    }
-  });
-}
-
-// Динамическая загрузка тарифов
-function loadTariffs(user) {
-  // ...создание экрана тарифов...
-  const tariffsScreen = document.createElement('section');
-  tariffsScreen.id = 'tariffs';
-  tariffsScreen.className = 'screen active';
-  tariffsScreen.innerHTML = `
-    <h2>Тарифы EcliptVPN</h2>
-    <div class="tariff-list">
-      <div class="tariff-card">
-        <img src="assets/vpn1.svg" class="tariff-img" />
-        <h3>Базовый</h3>
-        <p>1 месяц — 299₽</p>
-        <button class="main-btn buy-btn" data-plan="basic">Купить</button>
-      </div>
-      <div class="tariff-card">
-        <img src="assets/vpn2.svg" class="tariff-img" />
-        <h3>Премиум</h3>
-        <p>6 месяцев — 1499₽</p>
-        <button class="main-btn buy-btn" data-plan="premium">Купить</button>
-      </div>
-      <div class="tariff-card">
-        <img src="assets/vpn3.svg" class="tariff-img" />
-        <h3>Годовой</h3>
-        <p>12 месяцев — 2499₽</p>
-        <button class="main-btn buy-btn" data-plan="year">Купить</button>
-      </div>
-    </div>
-    <button class="main-btn" id="profileBtn">Личный кабинет</button>
-  `;
+async function loadProfile(user) {
   app.innerHTML = '';
-  app.appendChild(tariffsScreen);
-
-  // Кнопки покупки
-  tariffsScreen.querySelectorAll('.buy-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const plan = btn.getAttribute('data-plan');
-      showPaymentModal(plan, user);
+  const profileScreen = document.createElement('section');
+  profileScreen.id = 'profile';
+  profileScreen.className = 'screen active';
+  profileScreen.innerHTML = `<h2>Личный кабинет <span class="info-icon" title="О профиле">ℹ️</span></h2><div class="profile-info"><img src="assets/user.svg" class="profile-img" /><p><b>${user.first_name || ''} ${user.last_name || ''}</b></p><p>ID: ${user.id}</p><p>Статус подписки: <span class="sub-status">...</span></p><button class="main-btn" id="backToTariffs">Назад к тарифам</button></div><div class="orders-history"><h3>История заказов</h3><ul></ul></div>`;
+  app.appendChild(profileScreen);
+  profileScreen.querySelector('#backToTariffs').onclick = () => loadTariffs(user);
+  // Всплывающая подсказка для инфо-иконки
+  const infoIcon = profileScreen.querySelector('.info-icon');
+  if (infoIcon) {
+    infoIcon.addEventListener('mouseenter', () => showTooltip(infoIcon, 'В профиле отображается статус подписки и история заказов.'));
+    infoIcon.addEventListener('mouseleave', hideTooltip);
+    infoIcon.addEventListener('touchstart', () => showTooltip(infoIcon, 'В профиле отображается статус подписки и история заказов.'));
+    infoIcon.addEventListener('touchend', hideTooltip);
+  }
+  // Получение профиля и истории заказов из API
+  try {
+    const res = await fetch('https://your-bot-backend/api/profile?user_id=' + user.id, {
+      headers: { 'X-Telegram-InitData': window.Telegram.WebApp.initData || '' }
     });
-  });
-
+    const data = await res.json();
+    if (data.subscription) {
+      profileScreen.querySelector('.sub-status').textContent = data.subscription.status;
+    }
+    if (Array.isArray(data.orders)) {
+      const ul = profileScreen.querySelector('.orders-history ul');
+      ul.innerHTML = data.orders.map(o => `<li>${o.date} — ${o.plan} — ${o.price}₽ — ${o.status}</li>`).join('');
+    }
+  } catch (e) {
+    profileScreen.querySelector('.orders-history ul').innerHTML = '<li>Ошибка загрузки истории заказов.</li>';
+  }
+    infoIcon.addEventListener('touchend', hideTooltip);
+  }
+  // Получение тарифов из API
+  try {
+    const res = await fetch('https://your-bot-backend/api/plans?user_id=' + user.id, {
+      headers: { 'X-Telegram-InitData': window.Telegram.WebApp.initData || '' }
+    });
+    const data = await res.json();
+    const list = tariffsScreen.querySelector('.tariff-list');
+    if (Array.isArray(data.plans)) {
+      data.plans.forEach((plan, idx) => {
+        const card = document.createElement('div');
+        card.className = 'tariff-card';
+        card.innerHTML = `
+          <img src="assets/vpn${(idx%3)+1}.svg" class="tariff-img" />
+          <h3>${plan.name}</h3>
+          <p>${plan.duration} мес — ${plan.price}₽</p>
+          <button class="main-btn buy-btn" data-plan="${plan.id}">Купить</button>
+        `;
+        card.querySelector('.buy-btn').onclick = () => showPaymentModal(plan.id, user);
+        list.appendChild(card);
+      });
+    } else {
+      list.innerHTML = '<p>Не удалось загрузить тарифы. Попробуйте позже.</p>';
+    }
+  } catch (e) {
+    tariffsScreen.querySelector('.tariff-list').innerHTML = '<p>Ошибка загрузки тарифов.</p>';
+  }
   // Переход в личный кабинет
   tariffsScreen.querySelector('#profileBtn').onclick = () => {
     loadProfile(user);
   };
-}
+// конец функции loadProfile
       // Всплывающая подсказка для инфо-иконки
       const infoIcon = tariffsScreen.querySelector('.info-icon');
       if (infoIcon) {
