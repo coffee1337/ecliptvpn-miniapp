@@ -141,6 +141,10 @@ body::before {
 .start-btn {
   font-size: 1.1rem;
   padding: 16px 32px;
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto;
+  display: block;
 }
 
 /* Заголовки */
@@ -622,6 +626,26 @@ body::before {
   justify-content: center;
   gap: 8px;
   box-shadow: var(--shadow);
+  width: 100%;
+  max-width: 100%;
+}
+
+.purchase-btn {
+  margin-top: 20px;
+  font-size: 1.1rem;
+  padding: 18px 24px;
+}
+
+.secondary-btn {
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  color: var(--primary);
+  margin-top: 12px;
+}
+
+.secondary-btn:hover {
+  background: var(--primary);
+  color: white;
 }
 
 .main-btn::before {
@@ -1204,6 +1228,193 @@ body::before {
   padding-bottom: 80px; /* Отступ для нижней навигации */
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+/* Стили для покупки VPN */
+.server-price {
+  font-weight: 600;
+  color: var(--primary);
+  font-size: 0.9rem;
+}
+
+.selected-server-info {
+  background: var(--bg-glass);
+  padding: 12px;
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.periods-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.period-card {
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.period-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.period-card.selected {
+  border-color: var(--primary);
+  background: rgba(0, 230, 255, 0.1);
+}
+
+.period-info {
+  flex: 1;
+}
+
+.period-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.period-duration {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.period-price {
+  text-align: right;
+}
+
+.price-current {
+  font-weight: 700;
+  color: var(--primary);
+  font-size: 1.1rem;
+}
+
+.price-original {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-decoration: line-through;
+  margin-top: 2px;
+}
+
+.discount-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--accent);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+.purchase-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.summary-row:last-child {
+  border-bottom: none;
+}
+
+.summary-row.discount {
+  color: var(--accent);
+}
+
+.summary-row.total {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--primary);
+  border-top: 2px solid var(--primary);
+  margin-top: 8px;
+  padding-top: 12px;
+}
+
+.purchase-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.purchase-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.purchase-label {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.purchase-value {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.payment-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.payment-option {
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.payment-option.selected {
+  border-color: var(--primary);
+  background: rgba(0, 230, 255, 0.1);
+}
+
+.payment-option:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.payment-icon {
+  font-size: 1.5rem;
+}
+
+.payment-name {
+  flex: 1;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.payment-amount {
+  font-weight: 700;
+  color: var(--primary);
+  font-size: 1.1rem;
 }
 
 /* Адаптивность для навигации */

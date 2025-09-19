@@ -56,12 +56,20 @@ const mockData = {
     }
   ],
   servers: [
-    { id: 1, country: '🇳🇱 Нидерланды', city: 'Амстердам', ping: '12ms', load: 23 },
-    { id: 2, country: '🇺🇸 США', city: 'Нью-Йорк', ping: '45ms', load: 67 },
-    { id: 3, country: '🇩🇪 Германия', city: 'Берлин', ping: '25ms', load: 45 },
-    { id: 4, country: '🇬🇧 Великобритания', city: 'Лондон', ping: '18ms', load: 34 },
-    { id: 5, country: '🇯🇵 Япония', city: 'Токио', ping: '89ms', load: 12 },
-    { id: 6, country: '🇸🇬 Сингапур', city: 'Сингапур', ping: '156ms', load: 8 }
+    { id: 1, country: '🇳🇱 Нидерланды', city: 'Амстердам', ping: '12ms', load: 23, price: 299 },
+    { id: 2, country: '🇺🇸 США', city: 'Нью-Йорк', ping: '45ms', load: 67, price: 399 },
+    { id: 3, country: '🇩🇪 Германия', city: 'Берлин', ping: '25ms', load: 45, price: 299 },
+    { id: 4, country: '🇬🇧 Великобритания', city: 'Лондон', ping: '18ms', load: 34, price: 349 },
+    { id: 5, country: '🇯🇵 Япония', city: 'Токио', ping: '89ms', load: 12, price: 499 },
+    { id: 6, country: '🇸🇬 Сингапур', city: 'Сингапур', ping: '156ms', load: 8, price: 449 },
+    { id: 7, country: '🇨🇦 Канада', city: 'Торонто', ping: '78ms', load: 15, price: 399 },
+    { id: 8, country: '🇦🇺 Австралия', city: 'Сидней', ping: '234ms', load: 5, price: 599 }
+  ],
+  periods: [
+    { id: 1, name: '1 месяц', duration: 30, discount: 0, multiplier: 1 },
+    { id: 2, name: '3 месяца', duration: 90, discount: 10, multiplier: 0.9 },
+    { id: 3, name: '6 месяцев', duration: 180, discount: 20, multiplier: 0.8 },
+    { id: 4, name: '1 год', duration: 365, discount: 30, multiplier: 0.7 }
   ],
   plans: [
     { id: 1, name: 'Basic', price: 299, duration: 'месяц', features: ['100 Mbps', '1 устройство', '5 стран'] },
@@ -74,7 +82,9 @@ const mockData = {
 let currentScreen = 'welcome';
 let currentUser = null;
 let selectedServer = null;
+let selectedPeriod = null;
 let isTransitioning = false;
+let purchaseStep = 'country'; // country, period, payment
 
 // Инициализация Telegram WebApp
 if (hasWebApp) {
@@ -327,82 +337,342 @@ function showProfile() {
   });
 }
 
-// Мои VPN
+// Мои VPN / Покупка VPN
 function showVPNs() {
   transitionToScreen('vpn', () => {
-    app.innerHTML = `
-      <div class="app-container">
-        <div class="screen active vpn-screen">
-          <div class="header">
-            <div class="back-btn" onclick="showMainMenu()">←</div>
-            <h2>Мои VPN</h2>
-          </div>
-          
-          <div class="vpn-list">
-            ${mockData.vpns.map(vpn => `
-              <div class="vpn-card ${vpn.status}">
-                <div class="vpn-header">
-                  <div class="vpn-icon">🔒</div>
-                  <div class="vpn-info">
-                    <div class="vpn-plan">${vpn.plan}</div>
-                    <div class="vpn-country">${vpn.country}</div>
-                  </div>
-                  <div class="vpn-status">${vpn.status === 'active' ? 'Активен' : 'Истек'}</div>
+    if (purchaseStep === 'country') {
+      showCountrySelection();
+    } else if (purchaseStep === 'period') {
+      showPeriodSelection();
+    } else if (purchaseStep === 'payment') {
+      showPaymentConfirmation();
+    } else {
+      showMyVPNs();
+    }
+  });
+}
+
+function showMyVPNs() {
+  app.innerHTML = `
+    <div class="app-container">
+      <div class="screen active vpn-screen">
+        <div class="header">
+          <div class="back-btn" onclick="showMainMenu()">←</div>
+          <h2>Мои VPN</h2>
+        </div>
+        
+        <div class="vpn-list">
+          ${mockData.vpns.map(vpn => `
+            <div class="vpn-card ${vpn.status}">
+              <div class="vpn-header">
+                <div class="vpn-icon">🔒</div>
+                <div class="vpn-info">
+                  <div class="vpn-plan">${vpn.plan}</div>
+                  <div class="vpn-country">${vpn.country}</div>
                 </div>
-                <div class="vpn-details">
-                  <div class="detail-row">
-                    <span class="detail-label">Сервер:</span>
-                    <span class="detail-value">${vpn.server}</span>
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Скорость:</span>
-                    <span class="detail-value">${vpn.speed}</span>
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Пинг:</span>
-                    <span class="detail-value">${vpn.ping}</span>
-                  </div>
-                  <div class="detail-row">
-                    <span class="detail-label">Действует до:</span>
-                    <span class="detail-value">${vpn.expiry}</span>
-                  </div>
+                <div class="vpn-status">${vpn.status === 'active' ? 'Активен' : 'Истек'}</div>
+              </div>
+              <div class="vpn-details">
+                <div class="detail-row">
+                  <span class="detail-label">Сервер:</span>
+                  <span class="detail-value">${vpn.server}</span>
                 </div>
-                <button class="main-btn" onclick="copyConfig('${vpn.config}')">
-                  <span class="btn-icon">📋</span>
-                  <span>Скопировать конфиг</span>
-                </button>
+                <div class="detail-row">
+                  <span class="detail-label">Скорость:</span>
+                  <span class="detail-value">${vpn.speed}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Пинг:</span>
+                  <span class="detail-value">${vpn.ping}</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Действует до:</span>
+                  <span class="detail-value">${vpn.expiry}</span>
+                </div>
+              </div>
+              <button class="main-btn" onclick="copyConfig('${vpn.config}')">
+                <span class="btn-icon">📋</span>
+                <span>Скопировать конфиг</span>
+              </button>
+            </div>
+          `).join('')}
+        </div>
+        
+        <button class="main-btn purchase-btn" onclick="startVPNPurchase()">
+          <span class="btn-icon">🛒</span>
+          <span>Купить VPN</span>
+        </button>
+      </div>
+      
+      <div class="bottom-nav">
+        <div class="nav-item" onclick="showMainMenu()">
+          <div class="nav-item-icon">🏠</div>
+          <div class="nav-item-text">Главная</div>
+        </div>
+        <div class="nav-item active" onclick="showVPNs()">
+          <div class="nav-item-icon">🔒</div>
+          <div class="nav-item-text">VPN</div>
+        </div>
+        <div class="nav-item" onclick="showServers()">
+          <div class="nav-item-icon">🌍</div>
+          <div class="nav-item-text">Серверы</div>
+        </div>
+        <div class="nav-item" onclick="showTopup()">
+          <div class="nav-item-icon">💰</div>
+          <div class="nav-item-text">Пополнить</div>
+        </div>
+        <div class="nav-item" onclick="showProfile()">
+          <div class="nav-item-icon">👤</div>
+          <div class="nav-item-text">Профиль</div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  updateBottomNav('vpn');
+}
+
+function showCountrySelection() {
+  app.innerHTML = `
+    <div class="app-container">
+      <div class="screen active vpn-screen">
+        <div class="header">
+          <div class="back-btn" onclick="resetVPNPurchase()">←</div>
+          <h2>Выберите страну</h2>
+        </div>
+        
+        <div class="card">
+          <h3 style="margin-bottom: 16px; color: var(--primary);">🌍 Доступные серверы</h3>
+          <div class="server-list">
+            ${mockData.servers.map(server => `
+              <div class="server-item" onclick="selectCountry(${server.id})">
+                <div class="server-info">
+                  <div class="server-country">${server.country}</div>
+                  <div class="server-city">${server.city}</div>
+                </div>
+                <div class="server-stats">
+                  <div class="server-ping">${server.ping}</div>
+                  <div class="server-load">${server.load}%</div>
+                </div>
+                <div class="server-price">₽${server.price}/мес</div>
               </div>
             `).join('')}
           </div>
         </div>
-        
-        <div class="bottom-nav">
-          <div class="nav-item" onclick="showMainMenu()">
-            <div class="nav-item-icon">🏠</div>
-            <div class="nav-item-text">Главная</div>
-          </div>
-          <div class="nav-item active" onclick="showVPNs()">
-            <div class="nav-item-icon">🔒</div>
-            <div class="nav-item-text">VPN</div>
-          </div>
-          <div class="nav-item" onclick="showServers()">
-            <div class="nav-item-icon">🌍</div>
-            <div class="nav-item-text">Серверы</div>
-          </div>
-          <div class="nav-item" onclick="showTopup()">
-            <div class="nav-item-icon">💰</div>
-            <div class="nav-item-text">Пополнить</div>
-          </div>
-          <div class="nav-item" onclick="showProfile()">
-            <div class="nav-item-icon">👤</div>
-            <div class="nav-item-text">Профиль</div>
-          </div>
+      </div>
+      
+      <div class="bottom-nav">
+        <div class="nav-item" onclick="showMainMenu()">
+          <div class="nav-item-icon">🏠</div>
+          <div class="nav-item-text">Главная</div>
+        </div>
+        <div class="nav-item active" onclick="showVPNs()">
+          <div class="nav-item-icon">🔒</div>
+          <div class="nav-item-text">VPN</div>
+        </div>
+        <div class="nav-item" onclick="showServers()">
+          <div class="nav-item-icon">🌍</div>
+          <div class="nav-item-text">Серверы</div>
+        </div>
+        <div class="nav-item" onclick="showTopup()">
+          <div class="nav-item-icon">💰</div>
+          <div class="nav-item-text">Пополнить</div>
+        </div>
+        <div class="nav-item" onclick="showProfile()">
+          <div class="nav-item-icon">👤</div>
+          <div class="nav-item-text">Профиль</div>
         </div>
       </div>
-    `;
-    
-    updateBottomNav('vpn');
-  });
+    </div>
+  `;
+  
+  updateBottomNav('vpn');
+}
+
+function showPeriodSelection() {
+  const totalPrice = Math.round(selectedServer.price * selectedPeriod.multiplier);
+  const discount = selectedPeriod.discount;
+  
+  app.innerHTML = `
+    <div class="app-container">
+      <div class="screen active vpn-screen">
+        <div class="header">
+          <div class="back-btn" onclick="backToCountrySelection()">←</div>
+          <h2>Выберите период</h2>
+        </div>
+        
+        <div class="card">
+          <h3 style="margin-bottom: 16px; color: var(--primary);">📅 Период подписки</h3>
+          <div class="selected-server-info">
+            <div class="server-country">${selectedServer.country}</div>
+            <div class="server-city">${selectedServer.city} • ${selectedServer.ping}</div>
+          </div>
+        </div>
+        
+        <div class="periods-list">
+          ${mockData.periods.map(period => {
+            const price = Math.round(selectedServer.price * period.multiplier);
+            const originalPrice = selectedServer.price;
+            const isSelected = selectedPeriod?.id === period.id;
+            
+            return `
+              <div class="period-card ${isSelected ? 'selected' : ''}" onclick="selectPeriod(${period.id})">
+                <div class="period-info">
+                  <div class="period-name">${period.name}</div>
+                  <div class="period-duration">${period.duration} дней</div>
+                </div>
+                <div class="period-price">
+                  <div class="price-current">₽${price}</div>
+                  ${discount > 0 ? `<div class="price-original">₽${originalPrice}</div>` : ''}
+                </div>
+                ${discount > 0 ? `<div class="discount-badge">-${period.discount}%</div>` : ''}
+              </div>
+            `;
+          }).join('')}
+        </div>
+        
+        ${selectedPeriod ? `
+          <div class="card">
+            <h3 style="margin-bottom: 16px; color: var(--primary);">💰 Итого</h3>
+            <div class="purchase-summary">
+              <div class="summary-row">
+                <span>Сервер:</span>
+                <span>${selectedServer.country} - ${selectedServer.city}</span>
+              </div>
+              <div class="summary-row">
+                <span>Период:</span>
+                <span>${selectedPeriod.name}</span>
+              </div>
+              <div class="summary-row">
+                <span>Цена за месяц:</span>
+                <span>₽${selectedServer.price}</span>
+              </div>
+              ${discount > 0 ? `
+                <div class="summary-row discount">
+                  <span>Скидка ${discount}%:</span>
+                  <span>-₽${Math.round(selectedServer.price * (1 - selectedPeriod.multiplier))}</span>
+                </div>
+              ` : ''}
+              <div class="summary-row total">
+                <span>К оплате:</span>
+                <span>₽${totalPrice}</span>
+              </div>
+            </div>
+          </div>
+        ` : ''}
+      </div>
+      
+      <div class="bottom-nav">
+        <div class="nav-item" onclick="showMainMenu()">
+          <div class="nav-item-icon">🏠</div>
+          <div class="nav-item-text">Главная</div>
+        </div>
+        <div class="nav-item active" onclick="showVPNs()">
+          <div class="nav-item-icon">🔒</div>
+          <div class="nav-item-text">VPN</div>
+        </div>
+        <div class="nav-item" onclick="showServers()">
+          <div class="nav-item-icon">🌍</div>
+          <div class="nav-item-text">Серверы</div>
+        </div>
+        <div class="nav-item" onclick="showTopup()">
+          <div class="nav-item-icon">💰</div>
+          <div class="nav-item-text">Пополнить</div>
+        </div>
+        <div class="nav-item" onclick="showProfile()">
+          <div class="nav-item-icon">👤</div>
+          <div class="nav-item-text">Профиль</div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  updateBottomNav('vpn');
+}
+
+function showPaymentConfirmation() {
+  const totalPrice = Math.round(selectedServer.price * selectedPeriod.multiplier);
+  
+  app.innerHTML = `
+    <div class="app-container">
+      <div class="screen active vpn-screen">
+        <div class="header">
+          <div class="back-btn" onclick="backToPeriodSelection()">←</div>
+          <h2>Подтверждение</h2>
+        </div>
+        
+        <div class="card">
+          <h3 style="margin-bottom: 16px; color: var(--primary);">💳 Подтверждение покупки</h3>
+          <div class="purchase-details">
+            <div class="purchase-item">
+              <div class="purchase-label">Сервер:</div>
+              <div class="purchase-value">${selectedServer.country} - ${selectedServer.city}</div>
+            </div>
+            <div class="purchase-item">
+              <div class="purchase-label">Период:</div>
+              <div class="purchase-value">${selectedPeriod.name}</div>
+            </div>
+            <div class="purchase-item">
+              <div class="purchase-label">Стоимость:</div>
+              <div class="purchase-value">₽${totalPrice}</div>
+            </div>
+            <div class="purchase-item">
+              <div class="purchase-label">Ваш баланс:</div>
+              <div class="purchase-value">₽${mockData.profile.balance}</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <h3 style="margin-bottom: 16px; color: var(--primary);">💰 Способ оплаты</h3>
+          <div class="payment-options">
+            <div class="payment-option selected">
+              <div class="payment-icon">💰</div>
+              <div class="payment-name">Списать с баланса</div>
+              <div class="payment-amount">₽${totalPrice}</div>
+            </div>
+          </div>
+        </div>
+        
+        <button class="main-btn purchase-btn" onclick="confirmPurchase()" ${totalPrice > mockData.profile.balance ? 'disabled' : ''}>
+          <span class="btn-icon">💳</span>
+          <span>${totalPrice > mockData.profile.balance ? 'Недостаточно средств' : 'Подтвердить покупку'}</span>
+        </button>
+        
+        ${totalPrice > mockData.profile.balance ? `
+          <button class="main-btn secondary-btn" onclick="showTopup()">
+            <span class="btn-icon">💰</span>
+            <span>Пополнить баланс</span>
+          </button>
+        ` : ''}
+      </div>
+      
+      <div class="bottom-nav">
+        <div class="nav-item" onclick="showMainMenu()">
+          <div class="nav-item-icon">🏠</div>
+          <div class="nav-item-text">Главная</div>
+        </div>
+        <div class="nav-item active" onclick="showVPNs()">
+          <div class="nav-item-icon">🔒</div>
+          <div class="nav-item-text">VPN</div>
+        </div>
+        <div class="nav-item" onclick="showServers()">
+          <div class="nav-item-icon">🌍</div>
+          <div class="nav-item-text">Серверы</div>
+        </div>
+        <div class="nav-item" onclick="showTopup()">
+          <div class="nav-item-icon">💰</div>
+          <div class="nav-item-text">Пополнить</div>
+        </div>
+        <div class="nav-item" onclick="showProfile()">
+          <div class="nav-item-icon">👤</div>
+          <div class="nav-item-text">Профиль</div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  updateBottomNav('vpn');
 }
 
 // Серверы
@@ -581,6 +851,88 @@ function showTopup() {
   });
 }
 
+// Функции покупки VPN
+function startVPNPurchase() {
+  purchaseStep = 'country';
+  selectedServer = null;
+  selectedPeriod = null;
+  showVPNs();
+}
+
+function selectCountry(serverId) {
+  selectedServer = mockData.servers.find(s => s.id === serverId);
+  purchaseStep = 'period';
+  showVPNs();
+  showToast(`Выбрана страна: ${selectedServer.country}`, 'success');
+}
+
+function selectPeriod(periodId) {
+  selectedPeriod = mockData.periods.find(p => p.id === periodId);
+  purchaseStep = 'payment';
+  showVPNs();
+  showToast(`Выбран период: ${selectedPeriod.name}`, 'success');
+}
+
+function backToCountrySelection() {
+  purchaseStep = 'country';
+  selectedServer = null;
+  selectedPeriod = null;
+  showVPNs();
+}
+
+function backToPeriodSelection() {
+  purchaseStep = 'period';
+  selectedPeriod = null;
+  showVPNs();
+}
+
+function resetVPNPurchase() {
+  purchaseStep = 'country';
+  selectedServer = null;
+  selectedPeriod = null;
+  showMyVPNs();
+}
+
+function confirmPurchase() {
+  const totalPrice = Math.round(selectedServer.price * selectedPeriod.multiplier);
+  
+  if (totalPrice > mockData.profile.balance) {
+    showToast('Недостаточно средств на балансе', 'error');
+    return;
+  }
+  
+  showToast('Обработка покупки...', 'info');
+  
+  setTimeout(() => {
+    // Списываем с баланса
+    mockData.profile.balance -= totalPrice;
+    
+    // Добавляем новый VPN
+    const newVPN = {
+      id: mockData.vpns.length + 1,
+      plan: 'Premium VPN',
+      country: selectedServer.country,
+      server: selectedServer.city + '-01',
+      expiry: new Date(Date.now() + selectedPeriod.duration * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      status: 'active',
+      speed: '1000 Mbps',
+      ping: selectedServer.ping,
+      config: `vpn://config${mockData.vpns.length + 1}.example.com`
+    };
+    
+    mockData.vpns.push(newVPN);
+    mockData.profile.vpn_count = mockData.vpns.filter(v => v.status === 'active').length;
+    
+    // Сбрасываем покупку
+    purchaseStep = 'country';
+    selectedServer = null;
+    selectedPeriod = null;
+    
+    showToast(`VPN успешно куплен! Баланс: ₽${mockData.profile.balance}`, 'success');
+    showMyVPNs();
+  }, 2000);
+}
+
 // Функции
 function selectServer(serverId) {
   selectedServer = mockData.servers.find(s => s.id === serverId);
@@ -678,5 +1030,12 @@ window.connectToServer = connectToServer;
 window.selectAmount = selectAmount;
 window.processPayment = processPayment;
 window.copyConfig = copyConfig;
+window.startVPNPurchase = startVPNPurchase;
+window.selectCountry = selectCountry;
+window.selectPeriod = selectPeriod;
+window.backToCountrySelection = backToCountrySelection;
+window.backToPeriodSelection = backToPeriodSelection;
+window.resetVPNPurchase = resetVPNPurchase;
+window.confirmPurchase = confirmPurchase;
 
 console.log('✅ EcliptVPN Mini App готов к работе!');
