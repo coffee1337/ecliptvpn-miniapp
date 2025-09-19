@@ -153,9 +153,9 @@ function showMainMenu() {
             <div class="nav-btn-icon">🌍</div>
             <div class="nav-btn-text">Серверы</div>
           </div>
-          <div class="nav-btn" onclick="showPlans()">
-            <div class="nav-btn-icon">💳</div>
-            <div class="nav-btn-text">Тарифы</div>
+          <div class="nav-btn" onclick="showTopup()">
+            <div class="nav-btn-icon">💰</div>
+            <div class="nav-btn-text">Пополнить</div>
           </div>
         </div>
         
@@ -186,6 +186,10 @@ function showMainMenu() {
         <div class="nav-item" onclick="showServers()">
           <div class="nav-item-icon">🌍</div>
           <div class="nav-item-text">Серверы</div>
+        </div>
+        <div class="nav-item" onclick="showTopup()">
+          <div class="nav-item-icon">💰</div>
+          <div class="nav-item-text">Пополнить</div>
         </div>
         <div class="nav-item" onclick="showProfile()">
           <div class="nav-item-icon">👤</div>
@@ -428,6 +432,93 @@ function showServers() {
   });
 }
 
+// Пополнение баланса
+function showTopup() {
+  transitionToScreen('topup', () => {
+    app.innerHTML = `
+      <div class="screen active topup">
+        <div class="header">
+          <div class="back-btn" onclick="showMainMenu()">←</div>
+          <h2>Пополнение</h2>
+        </div>
+        
+        <div class="card">
+          <div class="balance-display">
+            <div class="balance-icon">💰</div>
+            <div class="balance-info">
+              <h3>Текущий баланс</h3>
+              <div class="balance-amount">₽${mockData.profile.balance}</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <h3 style="margin-bottom: 16px; color: var(--primary);">💳 Сумма пополнения</h3>
+          <div class="quick-amounts">
+            <button class="amount-btn" onclick="selectAmount(100)">₽100</button>
+            <button class="amount-btn" onclick="selectAmount(500)">₽500</button>
+            <button class="amount-btn" onclick="selectAmount(1000)">₽1000</button>
+            <button class="amount-btn" onclick="selectAmount(2000)">₽2000</button>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Или введите свою сумму:</label>
+            <input type="number" id="customAmount" class="form-input" placeholder="Введите сумму" min="10" max="50000">
+          </div>
+          
+          <button class="main-btn" onclick="processPayment()" style="width: 100%; margin-top: 16px;">
+            <span class="btn-icon">💳</span>
+            <span>Пополнить баланс</span>
+          </button>
+        </div>
+        
+        <div class="card">
+          <h3 style="margin-bottom: 16px; color: var(--primary);">💡 Способы оплаты</h3>
+          <div class="payment-methods">
+            <div class="payment-method">
+              <div class="payment-icon">💳</div>
+              <div class="payment-name">Банковская карта</div>
+            </div>
+            <div class="payment-method">
+              <div class="payment-icon">📱</div>
+              <div class="payment-name">СБП</div>
+            </div>
+            <div class="payment-method">
+              <div class="payment-icon">🏦</div>
+              <div class="payment-name">Банковский перевод</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="bottom-nav">
+        <div class="nav-item" onclick="showMainMenu()">
+          <div class="nav-item-icon">🏠</div>
+          <div class="nav-item-text">Главная</div>
+        </div>
+        <div class="nav-item" onclick="showVPNs()">
+          <div class="nav-item-icon">🔒</div>
+          <div class="nav-item-text">VPN</div>
+        </div>
+        <div class="nav-item" onclick="showServers()">
+          <div class="nav-item-icon">🌍</div>
+          <div class="nav-item-text">Серверы</div>
+        </div>
+        <div class="nav-item active" onclick="showTopup()">
+          <div class="nav-item-icon">💰</div>
+          <div class="nav-item-text">Пополнить</div>
+        </div>
+        <div class="nav-item" onclick="showProfile()">
+          <div class="nav-item-icon">👤</div>
+          <div class="nav-item-text">Профиль</div>
+        </div>
+      </div>
+    `;
+    
+    updateBottomNav('topup');
+  });
+}
+
 // Тарифы
 function showPlans() {
   transitionToScreen('plans', () => {
@@ -484,6 +575,10 @@ function showPlans() {
           <div class="nav-item-icon">🌍</div>
           <div class="nav-item-text">Серверы</div>
         </div>
+        <div class="nav-item" onclick="showTopup()">
+          <div class="nav-item-icon">💰</div>
+          <div class="nav-item-text">Пополнить</div>
+        </div>
         <div class="nav-item" onclick="showProfile()">
           <div class="nav-item-icon">👤</div>
           <div class="nav-item-text">Профиль</div>
@@ -523,6 +618,47 @@ function selectPlan(planId) {
   setTimeout(() => {
     showToast('Платеж успешно обработан!', 'success');
   }, 1500);
+}
+
+function selectAmount(amount) {
+  // Убираем активный класс со всех кнопок
+  document.querySelectorAll('.amount-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  
+  // Добавляем активный класс к выбранной кнопке
+  event.target.classList.add('active');
+  
+  // Устанавливаем значение в поле ввода
+  const customAmountInput = document.getElementById('customAmount');
+  if (customAmountInput) {
+    customAmountInput.value = amount;
+  }
+  
+  showToast(`Выбрана сумма: ₽${amount}`, 'info');
+}
+
+function processPayment() {
+  const customAmountInput = document.getElementById('customAmount');
+  const amount = customAmountInput ? customAmountInput.value : 0;
+  
+  if (!amount || amount < 10) {
+    showToast('Введите сумму от 10 рублей', 'error');
+    return;
+  }
+  
+  showToast('Обработка платежа...', 'info');
+  
+  setTimeout(() => {
+    // Обновляем баланс
+    mockData.profile.balance += parseInt(amount);
+    showToast(`Баланс пополнен на ₽${amount}!`, 'success');
+    
+    // Обновляем главное меню если оно открыто
+    if (currentScreen === 'main') {
+      showMainMenu();
+    }
+  }, 2000);
 }
 
 function copyConfig(config) {
@@ -569,15 +705,18 @@ document.addEventListener('DOMContentLoaded', () => {
   showWelcome();
 });
 
-// Обработка кнопки "Начать"
+// Глобальные функции
 window.showMainMenu = showMainMenu;
 window.showProfile = showProfile;
 window.showVPNs = showVPNs;
 window.showServers = showServers;
+window.showTopup = showTopup;
 window.showPlans = showPlans;
 window.selectServer = selectServer;
 window.connectToServer = connectToServer;
 window.selectPlan = selectPlan;
+window.selectAmount = selectAmount;
+window.processPayment = processPayment;
 window.copyConfig = copyConfig;
 
 console.log('✅ EcliptVPN Mini App готов к работе!');
