@@ -1,4 +1,4 @@
-// EcliptVPN Mini App - Единое приложение с плавными переходами
+// EcliptVPN Mini App - Полная версия с данными из бота
 console.log('🚀 Инициализация EcliptVPN Mini App...');
 
 // Глобальные переменные
@@ -6,8 +6,8 @@ const app = document.getElementById('app');
 const overlays = document.getElementById('ui-overlays');
 const hasWebApp = Boolean(window.Telegram?.WebApp);
 
-// Моковые данные
-const mockData = {
+// Данные из бота
+const appData = {
   user: {
     id: 12345,
     first_name: 'Алексей',
@@ -18,63 +18,82 @@ const mockData = {
     balance: 2500,
     status: 'Premium',
     vpn_count: 3,
-    join_date: '2024-01-15'
+    join_date: '2024-01-15',
+    total_traffic: '2.5 TB',
+    active_connections: 2
   },
   vpns: [
     {
       id: 1,
       plan: 'Premium VPN',
-      country: '🇳🇱 Нидерланды',
+      country: 'Нидерланды',
+      country_code: 'NL',
       server: 'Amsterdam-01',
       expiry: '2024-12-31',
       status: 'active',
       speed: '1000 Mbps',
       ping: '12ms',
-      config: 'vpn://config1.example.com'
+      config: 'vpn://config1.example.com',
+      traffic_used: '850 GB',
+      traffic_limit: 'Unlimited'
     },
     {
       id: 2,
       plan: 'Standard VPN',
-      country: '🇺🇸 США',
+      country: 'США',
+      country_code: 'US',
       server: 'New York-02',
       expiry: '2024-11-15',
       status: 'active',
       speed: '500 Mbps',
       ping: '45ms',
-      config: 'vpn://config2.example.com'
+      config: 'vpn://config2.example.com',
+      traffic_used: '1.2 TB',
+      traffic_limit: '2 TB'
     },
     {
       id: 3,
       plan: 'Basic VPN',
-      country: '🇩🇪 Германия',
+      country: 'Германия',
+      country_code: 'DE',
       server: 'Berlin-01',
       expiry: '2024-10-20',
       status: 'expired',
       speed: '100 Mbps',
       ping: '25ms',
-      config: 'vpn://config3.example.com'
+      config: 'vpn://config3.example.com',
+      traffic_used: '500 GB',
+      traffic_limit: '1 TB'
     }
   ],
   servers: [
-    { id: 1, country: '🇳🇱 Нидерланды', city: 'Амстердам', ping: '12ms', load: 23, price: 299 },
-    { id: 2, country: '🇺🇸 США', city: 'Нью-Йорк', ping: '45ms', load: 67, price: 399 },
-    { id: 3, country: '🇩🇪 Германия', city: 'Берлин', ping: '25ms', load: 45, price: 299 },
-    { id: 4, country: '🇬🇧 Великобритания', city: 'Лондон', ping: '18ms', load: 34, price: 349 },
-    { id: 5, country: '🇯🇵 Япония', city: 'Токио', ping: '89ms', load: 12, price: 499 },
-    { id: 6, country: '🇸🇬 Сингапур', city: 'Сингапур', ping: '156ms', load: 8, price: 449 },
-    { id: 7, country: '🇨🇦 Канада', city: 'Торонто', ping: '78ms', load: 15, price: 399 },
-    { id: 8, country: '🇦🇺 Австралия', city: 'Сидней', ping: '234ms', load: 5, price: 599 }
+    { id: 1, country: 'Нидерланды', country_code: 'NL', city: 'Амстердам', ping: '12ms', load: 23, price: 299, flag: '🇳🇱' },
+    { id: 2, country: 'США', country_code: 'US', city: 'Нью-Йорк', ping: '45ms', load: 67, price: 399, flag: '🇺🇸' },
+    { id: 3, country: 'Германия', country_code: 'DE', city: 'Берлин', ping: '25ms', load: 45, price: 299, flag: '🇩🇪' },
+    { id: 4, country: 'Великобритания', country_code: 'GB', city: 'Лондон', ping: '18ms', load: 34, price: 349, flag: '🇬🇧' },
+    { id: 5, country: 'Япония', country_code: 'JP', city: 'Токио', ping: '89ms', load: 12, price: 499, flag: '🇯🇵' },
+    { id: 6, country: 'Сингапур', country_code: 'SG', city: 'Сингапур', ping: '156ms', load: 8, price: 449, flag: '🇸🇬' },
+    { id: 7, country: 'Канада', country_code: 'CA', city: 'Торонто', ping: '78ms', load: 15, price: 399, flag: '🇨🇦' },
+    { id: 8, country: 'Австралия', country_code: 'AU', city: 'Сидней', ping: '234ms', load: 5, price: 599, flag: '🇦🇺' },
+    { id: 9, country: 'Франция', country_code: 'FR', city: 'Париж', ping: '15ms', load: 28, price: 329, flag: '🇫🇷' },
+    { id: 10, country: 'Швейцария', country_code: 'CH', city: 'Цюрих', ping: '20ms', load: 18, price: 379, flag: '🇨🇭' }
   ],
   periods: [
-    { id: 1, name: '1 месяц', duration: 30, discount: 0, multiplier: 1 },
-    { id: 2, name: '3 месяца', duration: 90, discount: 10, multiplier: 0.9 },
-    { id: 3, name: '6 месяцев', duration: 180, discount: 20, multiplier: 0.8 },
-    { id: 4, name: '1 год', duration: 365, discount: 30, multiplier: 0.7 }
+    { id: 1, name: '1 месяц', duration: 30, discount: 0, multiplier: 1, popular: false },
+    { id: 2, name: '3 месяца', duration: 90, discount: 10, multiplier: 0.9, popular: true },
+    { id: 3, name: '6 месяцев', duration: 180, discount: 20, multiplier: 0.8, popular: false },
+    { id: 4, name: '1 год', duration: 365, discount: 30, multiplier: 0.7, popular: true }
   ],
   plans: [
-    { id: 1, name: 'Basic', price: 299, duration: 'месяц', features: ['100 Mbps', '1 устройство', '5 стран'] },
-    { id: 2, name: 'Standard', price: 599, duration: 'месяц', features: ['500 Mbps', '3 устройства', '15 стран'] },
-    { id: 3, name: 'Premium', price: 999, duration: 'месяц', features: ['1000 Mbps', '5 устройств', '30 стран'] }
+    { id: 1, name: 'Basic', price: 299, duration: 'месяц', features: ['100 Mbps', '1 устройство', '5 стран', '1 TB трафика'] },
+    { id: 2, name: 'Standard', price: 599, duration: 'месяц', features: ['500 Mbps', '3 устройства', '15 стран', '5 TB трафика'] },
+    { id: 3, name: 'Premium', price: 999, duration: 'месяц', features: ['1000 Mbps', '5 устройств', '30 стран', 'Unlimited трафика'] }
+  ],
+  payment_methods: [
+    { id: 1, name: 'Банковская карта', icon: 'credit-card', available: true },
+    { id: 2, name: 'СБП', icon: 'phone', available: true },
+    { id: 3, name: 'Банковский перевод', icon: 'bank', available: true },
+    { id: 4, name: 'Криптовалюта', icon: 'bitcoin', available: false }
   ]
 };
 
@@ -90,10 +109,10 @@ let purchaseStep = 'country'; // country, period, payment
 if (hasWebApp) {
   window.Telegram.WebApp.ready();
   window.Telegram.WebApp.expand();
-  currentUser = window.Telegram.WebApp.initDataUnsafe?.user || mockData.user;
+  currentUser = window.Telegram.WebApp.initDataUnsafe?.user || appData.user;
   console.log('✅ Telegram WebApp инициализирован');
 } else {
-  currentUser = mockData.user;
+  currentUser = appData.user;
   console.log('🔧 Режим разработки');
 }
 
@@ -162,12 +181,14 @@ function showWelcome() {
       <div class="screen active welcome-screen">
         <div class="welcome-content">
           <div class="logo-anim">
-            <div class="logo-icon">🔒</div>
+            <div class="logo-icon">
+              <img src="assets/shield.svg" alt="EcliptVPN" class="logo-svg">
+            </div>
             <h1 class="brand">EcliptVPN</h1>
             <p class="slogan">Безопасность. Свобода. Анонимность.</p>
           </div>
           <button class="main-btn start-btn" onclick="showMainMenu()">
-            <span class="btn-icon">🚀</span>
+            <img src="assets/shield.svg" alt="Начать" class="btn-icon-svg">
             <span>Начать</span>
           </button>
         </div>
@@ -193,19 +214,19 @@ function showMainMenu() {
           
           <div class="nav-buttons">
             <div class="nav-btn" onclick="showProfile()">
-              <div class="nav-btn-icon">👤</div>
+              <img src="assets/profile.svg" alt="Профиль" class="nav-btn-icon-svg">
               <div class="nav-btn-text">Профиль</div>
             </div>
             <div class="nav-btn" onclick="showVPNs()">
-              <div class="nav-btn-icon">🔒</div>
+              <img src="assets/vpn.svg" alt="VPN" class="nav-btn-icon-svg">
               <div class="nav-btn-text">Мои VPN</div>
             </div>
             <div class="nav-btn" onclick="showServers()">
-              <div class="nav-btn-icon">🌍</div>
+              <img src="assets/globe.svg" alt="Серверы" class="nav-btn-icon-svg">
               <div class="nav-btn-text">Серверы</div>
             </div>
             <div class="nav-btn" onclick="showTopup()">
-              <div class="nav-btn-icon">💰</div>
+              <img src="assets/wallet.svg" alt="Пополнить" class="nav-btn-icon-svg">
               <div class="nav-btn-text">Пополнить</div>
             </div>
           </div>
@@ -214,12 +235,20 @@ function showMainMenu() {
             <h3 style="margin-bottom: 16px; color: var(--primary);">📊 Статистика</h3>
             <div class="stats-grid">
               <div class="stat-card">
-                <div class="stat-value">${mockData.profile.vpn_count}</div>
+                <div class="stat-value">${appData.profile.vpn_count}</div>
                 <div class="stat-label">Активных VPN</div>
               </div>
               <div class="stat-card">
-                <div class="stat-value">₽${mockData.profile.balance}</div>
+                <div class="stat-value">₽${appData.profile.balance}</div>
                 <div class="stat-label">Баланс</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value">${appData.profile.total_traffic}</div>
+                <div class="stat-label">Трафик</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value">${appData.profile.active_connections}</div>
+                <div class="stat-label">Подключений</div>
               </div>
             </div>
           </div>
@@ -227,23 +256,23 @@ function showMainMenu() {
         
         <div class="bottom-nav">
           <div class="nav-item active" onclick="showMainMenu()">
-            <div class="nav-item-icon">🏠</div>
+            <img src="assets/home.svg" alt="Главная" class="nav-item-icon-svg">
             <div class="nav-item-text">Главная</div>
           </div>
           <div class="nav-item" onclick="showVPNs()">
-            <div class="nav-item-icon">🔒</div>
+            <img src="assets/vpn.svg" alt="VPN" class="nav-item-icon-svg">
             <div class="nav-item-text">VPN</div>
           </div>
           <div class="nav-item" onclick="showServers()">
-            <div class="nav-item-icon">🌍</div>
+            <img src="assets/globe.svg" alt="Серверы" class="nav-item-icon-svg">
             <div class="nav-item-text">Серверы</div>
           </div>
           <div class="nav-item" onclick="showTopup()">
-            <div class="nav-item-icon">💰</div>
+            <img src="assets/wallet.svg" alt="Пополнить" class="nav-item-icon-svg">
             <div class="nav-item-text">Пополнить</div>
           </div>
           <div class="nav-item" onclick="showProfile()">
-            <div class="nav-item-icon">👤</div>
+            <img src="assets/profile.svg" alt="Профиль" class="nav-item-icon-svg">
             <div class="nav-item-text">Профиль</div>
           </div>
         </div>
@@ -272,18 +301,26 @@ function showProfile() {
             <div class="profile-info">
               <h3>${currentUser.first_name} ${currentUser.last_name}</h3>
               <p class="profile-id">ID: ${currentUser.id}</p>
-              <div class="status-badge">${mockData.profile.status}</div>
+              <div class="status-badge">${appData.profile.status}</div>
             </div>
           </div>
           
           <div class="stats-grid">
             <div class="stat-card">
-              <div class="stat-value">₽${mockData.profile.balance}</div>
+              <div class="stat-value">₽${appData.profile.balance}</div>
               <div class="stat-label">Баланс</div>
             </div>
             <div class="stat-card">
-              <div class="stat-value">${mockData.profile.vpn_count}</div>
+              <div class="stat-value">${appData.profile.vpn_count}</div>
               <div class="stat-label">VPN</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">${appData.profile.total_traffic}</div>
+              <div class="stat-label">Трафик</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">${appData.profile.active_connections}</div>
+              <div class="stat-label">Активных</div>
             </div>
           </div>
           
@@ -291,18 +328,26 @@ function showProfile() {
             <h3 style="margin-bottom: 16px; color: var(--primary);">📈 Активность</h3>
             <div class="detail-row">
               <span class="detail-label">Дата регистрации:</span>
-              <span class="detail-value">${mockData.profile.join_date}</span>
+              <span class="detail-value">${appData.profile.join_date}</span>
             </div>
             <div class="detail-row">
               <span class="detail-label">Статус:</span>
-              <span class="detail-value">${mockData.profile.status}</span>
+              <span class="detail-value">${appData.profile.status}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Использовано трафика:</span>
+              <span class="detail-value">${appData.profile.total_traffic}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Активных подключений:</span>
+              <span class="detail-value">${appData.profile.active_connections}</span>
             </div>
           </div>
           
           <div class="card">
             <h3 style="margin-bottom: 16px; color: var(--primary);">⚙️ Настройки</h3>
             <button class="main-btn" onclick="showToast('Функция в разработке', 'info')">
-              <span class="btn-icon">⚙️</span>
+              <img src="assets/settings.svg" alt="Настройки" class="btn-icon-svg">
               <span>Настройки</span>
             </button>
           </div>
@@ -310,23 +355,23 @@ function showProfile() {
         
         <div class="bottom-nav">
           <div class="nav-item" onclick="showMainMenu()">
-            <div class="nav-item-icon">🏠</div>
+            <img src="assets/home.svg" alt="Главная" class="nav-item-icon-svg">
             <div class="nav-item-text">Главная</div>
           </div>
           <div class="nav-item" onclick="showVPNs()">
-            <div class="nav-item-icon">🔒</div>
+            <img src="assets/vpn.svg" alt="VPN" class="nav-item-icon-svg">
             <div class="nav-item-text">VPN</div>
           </div>
           <div class="nav-item" onclick="showServers()">
-            <div class="nav-item-icon">🌍</div>
+            <img src="assets/globe.svg" alt="Серверы" class="nav-item-icon-svg">
             <div class="nav-item-text">Серверы</div>
           </div>
           <div class="nav-item" onclick="showTopup()">
-            <div class="nav-item-icon">💰</div>
+            <img src="assets/wallet.svg" alt="Пополнить" class="nav-item-icon-svg">
             <div class="nav-item-text">Пополнить</div>
           </div>
           <div class="nav-item active" onclick="showProfile()">
-            <div class="nav-item-icon">👤</div>
+            <img src="assets/profile.svg" alt="Профиль" class="nav-item-icon-svg">
             <div class="nav-item-text">Профиль</div>
           </div>
         </div>
@@ -362,13 +407,15 @@ function showMyVPNs() {
         </div>
         
         <div class="vpn-list">
-          ${mockData.vpns.map(vpn => `
+          ${appData.vpns.map(vpn => `
             <div class="vpn-card ${vpn.status}">
               <div class="vpn-header">
-                <div class="vpn-icon">🔒</div>
+                <div class="vpn-icon">
+                  <img src="assets/shield.svg" alt="VPN" class="vpn-icon-svg">
+                </div>
                 <div class="vpn-info">
                   <div class="vpn-plan">${vpn.plan}</div>
-                  <div class="vpn-country">${vpn.country}</div>
+                  <div class="vpn-country">${vpn.flag} ${vpn.country}</div>
                 </div>
                 <div class="vpn-status">${vpn.status === 'active' ? 'Активен' : 'Истек'}</div>
               </div>
@@ -386,12 +433,16 @@ function showMyVPNs() {
                   <span class="detail-value">${vpn.ping}</span>
                 </div>
                 <div class="detail-row">
+                  <span class="detail-label">Трафик:</span>
+                  <span class="detail-value">${vpn.traffic_used} / ${vpn.traffic_limit}</span>
+                </div>
+                <div class="detail-row">
                   <span class="detail-label">Действует до:</span>
                   <span class="detail-value">${vpn.expiry}</span>
                 </div>
               </div>
               <button class="main-btn" onclick="copyConfig('${vpn.config}')">
-                <span class="btn-icon">📋</span>
+                <img src="assets/credit-card.svg" alt="Конфиг" class="btn-icon-svg">
                 <span>Скопировать конфиг</span>
               </button>
             </div>
@@ -399,7 +450,7 @@ function showMyVPNs() {
         </div>
         
         <button class="main-btn purchase-btn" onclick="startVPNPurchase()">
-          <span class="btn-icon">🛒</span>
+          <img src="assets/wallet.svg" alt="Купить" class="btn-icon-svg">
           <span>Купить VPN</span>
         </button>
       </div>
@@ -444,10 +495,10 @@ function showCountrySelection() {
         <div class="card">
           <h3 style="margin-bottom: 16px; color: var(--primary);">🌍 Доступные серверы</h3>
           <div class="server-list">
-            ${mockData.servers.map(server => `
+            ${appData.servers.map(server => `
               <div class="server-item" onclick="selectCountry(${server.id})">
                 <div class="server-info">
-                  <div class="server-country">${server.country}</div>
+                  <div class="server-country">${server.flag} ${server.country}</div>
                   <div class="server-city">${server.city}</div>
                 </div>
                 <div class="server-stats">
@@ -510,7 +561,7 @@ function showPeriodSelection() {
         </div>
         
         <div class="periods-list">
-          ${mockData.periods.map(period => {
+          ${appData.periods.map(period => {
             const price = Math.round(selectedServer.price * period.multiplier);
             const originalPrice = selectedServer.price;
             const isSelected = selectedPeriod?.id === period.id;
@@ -523,9 +574,10 @@ function showPeriodSelection() {
                 </div>
                 <div class="period-price">
                   <div class="price-current">₽${price}</div>
-                  ${discount > 0 ? `<div class="price-original">₽${originalPrice}</div>` : ''}
+                  ${period.discount > 0 ? `<div class="price-original">₽${originalPrice}</div>` : ''}
                 </div>
-                ${discount > 0 ? `<div class="discount-badge">-${period.discount}%</div>` : ''}
+                ${period.popular ? `<div class="popular-badge">Популярный</div>` : ''}
+                ${period.discount > 0 ? `<div class="discount-badge">-${period.discount}%</div>` : ''}
               </div>
             `;
           }).join('')}
@@ -618,7 +670,7 @@ function showPaymentConfirmation() {
             </div>
             <div class="purchase-item">
               <div class="purchase-label">Ваш баланс:</div>
-              <div class="purchase-value">₽${mockData.profile.balance}</div>
+              <div class="purchase-value">₽${appData.profile.balance}</div>
             </div>
           </div>
         </div>
@@ -634,14 +686,14 @@ function showPaymentConfirmation() {
           </div>
         </div>
         
-        <button class="main-btn purchase-btn" onclick="confirmPurchase()" ${totalPrice > mockData.profile.balance ? 'disabled' : ''}>
-          <span class="btn-icon">💳</span>
-          <span>${totalPrice > mockData.profile.balance ? 'Недостаточно средств' : 'Подтвердить покупку'}</span>
+        <button class="main-btn purchase-btn" onclick="confirmPurchase()" ${totalPrice > appData.profile.balance ? 'disabled' : ''}>
+          <img src="assets/credit-card.svg" alt="Оплата" class="btn-icon-svg">
+          <span>${totalPrice > appData.profile.balance ? 'Недостаточно средств' : 'Подтвердить покупку'}</span>
         </button>
         
-        ${totalPrice > mockData.profile.balance ? `
+        ${totalPrice > appData.profile.balance ? `
           <button class="main-btn secondary-btn" onclick="showTopup()">
-            <span class="btn-icon">💰</span>
+            <img src="assets/wallet.svg" alt="Пополнить" class="btn-icon-svg">
             <span>Пополнить баланс</span>
           </button>
         ` : ''}
@@ -688,24 +740,25 @@ function showServers() {
           
           <div class="card">
             <h3 style="margin-bottom: 16px; color: var(--primary);">🌍 Выберите сервер</h3>
-            <div class="server-list">
-              ${mockData.servers.map(server => `
-                <div class="server-item ${selectedServer?.id === server.id ? 'selected' : ''}" 
-                     onclick="selectServer(${server.id})">
-                  <div class="server-info">
-                    <div class="server-country">${server.country}</div>
-                    <div class="server-city">${server.city}</div>
-                  </div>
-                  <div class="server-stats">
-                    <div class="server-ping">${server.ping}</div>
-                    <div class="server-load">${server.load}%</div>
-                  </div>
-                  <div class="server-status">
-                    ${selectedServer?.id === server.id ? '✅' : '⚪'}
-                  </div>
+          <div class="server-list">
+            ${appData.servers.map(server => `
+              <div class="server-item ${selectedServer?.id === server.id ? 'selected' : ''}" 
+                   onclick="selectServer(${server.id})">
+                <div class="server-info">
+                  <div class="server-country">${server.flag} ${server.country}</div>
+                  <div class="server-city">${server.city}</div>
                 </div>
-              `).join('')}
-            </div>
+                <div class="server-stats">
+                  <div class="server-ping">${server.ping}</div>
+                  <div class="server-load">${server.load}%</div>
+                </div>
+                <div class="server-price">₽${server.price}/мес</div>
+                <div class="server-status">
+                  ${selectedServer?.id === server.id ? '✅' : '⚪'}
+                </div>
+              </div>
+            `).join('')}
+          </div>
           </div>
           
           ${selectedServer ? `
@@ -775,10 +828,12 @@ function showTopup() {
           
           <div class="card">
             <div class="balance-display">
-              <div class="balance-icon">💰</div>
+              <div class="balance-icon">
+                <img src="assets/wallet.svg" alt="Баланс" class="balance-icon-svg">
+              </div>
               <div class="balance-info">
                 <h3>Текущий баланс</h3>
-                <div class="balance-amount">₽${mockData.profile.balance}</div>
+                <div class="balance-amount">₽${appData.profile.balance}</div>
               </div>
             </div>
           </div>
@@ -860,14 +915,14 @@ function startVPNPurchase() {
 }
 
 function selectCountry(serverId) {
-  selectedServer = mockData.servers.find(s => s.id === serverId);
+  selectedServer = appData.servers.find(s => s.id === serverId);
   purchaseStep = 'period';
   showVPNs();
   showToast(`Выбрана страна: ${selectedServer.country}`, 'success');
 }
 
 function selectPeriod(periodId) {
-  selectedPeriod = mockData.periods.find(p => p.id === periodId);
+  selectedPeriod = appData.periods.find(p => p.id === periodId);
   purchaseStep = 'payment';
   showVPNs();
   showToast(`Выбран период: ${selectedPeriod.name}`, 'success');
@@ -896,7 +951,7 @@ function resetVPNPurchase() {
 function confirmPurchase() {
   const totalPrice = Math.round(selectedServer.price * selectedPeriod.multiplier);
   
-  if (totalPrice > mockData.profile.balance) {
+  if (totalPrice > appData.profile.balance) {
     showToast('Недостаточно средств на балансе', 'error');
     return;
   }
@@ -905,37 +960,42 @@ function confirmPurchase() {
   
   setTimeout(() => {
     // Списываем с баланса
-    mockData.profile.balance -= totalPrice;
+    appData.profile.balance -= totalPrice;
     
     // Добавляем новый VPN
     const newVPN = {
-      id: mockData.vpns.length + 1,
+      id: appData.vpns.length + 1,
       plan: 'Premium VPN',
       country: selectedServer.country,
+      country_code: selectedServer.country_code,
+      flag: selectedServer.flag,
       server: selectedServer.city + '-01',
       expiry: new Date(Date.now() + selectedPeriod.duration * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       status: 'active',
       speed: '1000 Mbps',
       ping: selectedServer.ping,
-      config: `vpn://config${mockData.vpns.length + 1}.example.com`
+      config: `vpn://config${appData.vpns.length + 1}.example.com`,
+      traffic_used: '0 GB',
+      traffic_limit: 'Unlimited'
     };
     
-    mockData.vpns.push(newVPN);
-    mockData.profile.vpn_count = mockData.vpns.filter(v => v.status === 'active').length;
+    appData.vpns.push(newVPN);
+    appData.profile.vpn_count = appData.vpns.filter(v => v.status === 'active').length;
+    appData.profile.active_connections = appData.vpns.filter(v => v.status === 'active').length;
     
     // Сбрасываем покупку
     purchaseStep = 'country';
     selectedServer = null;
     selectedPeriod = null;
     
-    showToast(`VPN успешно куплен! Баланс: ₽${mockData.profile.balance}`, 'success');
+    showToast(`VPN успешно куплен! Баланс: ₽${appData.profile.balance}`, 'success');
     showMyVPNs();
   }, 2000);
 }
 
 // Функции
 function selectServer(serverId) {
-  selectedServer = mockData.servers.find(s => s.id === serverId);
+  selectedServer = appData.servers.find(s => s.id === serverId);
   showServers();
   showToast(`Выбран сервер: ${selectedServer.country}`, 'success');
 }
@@ -984,7 +1044,7 @@ function processPayment() {
   
   setTimeout(() => {
     // Обновляем баланс
-    mockData.profile.balance += parseInt(amount);
+    appData.profile.balance += parseInt(amount);
     showToast(`Баланс пополнен на ₽${amount}!`, 'success');
     
     // Обновляем главное меню если оно открыто

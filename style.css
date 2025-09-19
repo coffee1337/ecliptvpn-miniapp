@@ -73,7 +73,8 @@ body::before {
 .app-container {
   position: relative;
   min-height: 100vh;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Экраны */
@@ -91,7 +92,27 @@ body::before {
   transform: translateX(100%);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) transparent;
+}
+
+.screen::-webkit-scrollbar {
+  width: 4px;
+}
+
+.screen::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.screen::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 2px;
+}
+
+.screen::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-dark);
 }
 
 .screen.active {
@@ -120,6 +141,48 @@ body::before {
   font-size: 4rem;
   margin-bottom: 20px;
   animation: logoFloat 3s ease-in-out infinite;
+}
+
+.logo-svg {
+  width: 64px;
+  height: 64px;
+  color: var(--primary);
+}
+
+.btn-icon-svg {
+  width: 20px;
+  height: 20px;
+  color: currentColor;
+}
+
+.nav-btn-icon-svg {
+  width: 24px;
+  height: 24px;
+  color: var(--primary);
+}
+
+.nav-item-icon-svg {
+  width: 20px;
+  height: 20px;
+  color: currentColor;
+  transition: var(--transition);
+}
+
+.nav-item:hover .nav-item-icon-svg {
+  color: var(--primary);
+  transform: scale(1.1);
+}
+
+.vpn-icon-svg {
+  width: 24px;
+  height: 24px;
+  color: var(--primary);
+}
+
+.balance-icon-svg {
+  width: 32px;
+  height: 32px;
+  color: var(--primary);
 }
 
 .brand {
@@ -1312,6 +1375,18 @@ body::before {
   top: -8px;
   right: -8px;
   background: var(--accent);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+.popular-badge {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  background: var(--primary);
   color: white;
   font-size: 0.7rem;
   font-weight: 600;
