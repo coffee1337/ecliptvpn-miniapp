@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const startBtn = document.getElementById('startBtn');
   if (startBtn) {
     startBtn.onclick = async () => {
+      console.log('Кнопка "Начать" нажата');
       if (window.Telegram && window.Telegram.WebApp) {
         window.Telegram.WebApp.expand();
         const user = window.Telegram.WebApp.initDataUnsafe.user;
