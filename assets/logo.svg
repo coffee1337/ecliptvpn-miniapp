@@ -1,6 +1,41 @@
 <svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
-<circle cx="48" cy="48" r="44" fill="#181c2a" stroke="#00e6ff" stroke-width="4"/>
-<path d="M48 20C62 20 76 32 76 48C76 64 62 76 48 76C34 76 20 64 20 48C20 32 34 20 48 20Z" fill="#00e6ff" fill-opacity="0.15"/>
-<path d="M48 32C56 32 64 40 64 48C64 56 56 64 48 64C40 64 32 56 32 48C32 40 40 32 48 32Z" fill="#00e6ff" fill-opacity="0.3"/>
-<circle cx="48" cy="48" r="12" fill="#00e6ff"/>
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00e6ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0057ff;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="48" cy="48" r="44" fill="url(#logoGradient)" opacity="0.1"/>
+  
+  <!-- Shield shape -->
+  <path d="M48 8 L68 18 L68 38 C68 50 48 68 48 68 C48 68 28 50 28 38 L28 18 Z" 
+        fill="url(#logoGradient)" 
+        filter="url(#glow)"/>
+  
+  <!-- Lock icon -->
+  <rect x="40" y="32" width="16" height="12" rx="2" fill="white" opacity="0.9"/>
+  <path d="M44 32 L44 28 C44 24 46 22 48 22 C50 22 52 24 52 28 L52 32" 
+        stroke="white" 
+        stroke-width="2" 
+        fill="none" 
+        opacity="0.9"/>
+  
+  <!-- Keyhole -->
+  <circle cx="48" cy="36" r="2" fill="#0057ff"/>
+  <rect x="47" y="36" width="2" height="4" fill="#0057ff"/>
+  
+  <!-- Decorative elements -->
+  <circle cx="20" cy="20" r="2" fill="#00e6ff" opacity="0.6"/>
+  <circle cx="76" cy="24" r="1.5" fill="#0057ff" opacity="0.6"/>
+  <circle cx="24" cy="72" r="1" fill="#00e6ff" opacity="0.4"/>
+  <circle cx="72" cy="68" r="1.5" fill="#0057ff" opacity="0.4"/>
 </svg>

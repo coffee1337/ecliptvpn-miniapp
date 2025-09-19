@@ -151,6 +151,125 @@ body {
   from { opacity: 0; transform: translateX(-50%) translateY(24px); }
   to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
+/* Дополнительные анимации */
+@keyframes slideInFromRight {
+  from { 
+    opacity: 0; 
+    transform: translateX(30px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateX(0); 
+  }
+}
+
+@keyframes slideInFromLeft {
+  from { 
+    opacity: 0; 
+    transform: translateX(-30px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateX(0); 
+  }
+}
+
+@keyframes scaleIn {
+  from { 
+    opacity: 0; 
+    transform: scale(0.9); 
+  }
+  to { 
+    opacity: 1; 
+    transform: scale(1); 
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    transform: scale(1); 
+  }
+  50% { 
+    transform: scale(1.05); 
+  }
+}
+
+/* Анимации для экранов */
+.screen {
+  animation: slideInFromRight 0.4s ease-out;
+}
+
+.screen.profile {
+  animation: slideInFromLeft 0.4s ease-out;
+}
+
+.screen.orders {
+  animation: scaleIn 0.4s ease-out;
+}
+
+/* Анимации для карточек */
+.vpn-card, .profile-card, .balance-card, .promo-card {
+  animation: scaleIn 0.3s ease-out;
+}
+
+.vpn-card:nth-child(1) { animation-delay: 0.1s; }
+.vpn-card:nth-child(2) { animation-delay: 0.2s; }
+.vpn-card:nth-child(3) { animation-delay: 0.3s; }
+
+/* Улучшенные hover эффекты */
+.menu-btn:hover {
+  transform: translateX(4px);
+  box-shadow: 0 6px 20px rgba(0, 230, 255, 0.25);
+}
+
+.vpn-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 12px 32px rgba(0, 230, 255, 0.2);
+}
+
+.profile-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 230, 255, 0.15);
+}
+
+/* Анимация загрузки */
+.loading-spinner {
+  animation: spin 1s linear infinite, pulse 2s ease-in-out infinite;
+}
+
+/* Улучшенные переходы */
+* {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Скрытие скроллбара для webkit браузеров */
+.orders-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.orders-container::-webkit-scrollbar-track {
+  background: rgba(0, 230, 255, 0.1);
+  border-radius: 2px;
+}
+
+.orders-container::-webkit-scrollbar-thumb {
+  background: rgba(0, 230, 255, 0.3);
+  border-radius: 2px;
+}
+
+.orders-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 230, 255, 0.5);
+}
+
+/* Улучшенные фокусы для доступности */
+.main-btn:focus-visible,
+.form-input:focus-visible,
+.amount-btn:focus-visible,
+.back-btn:focus-visible {
+  outline: 2px solid #00e6ff;
+  outline-offset: 2px;
+}
+
 /* Адаптивность */
 @media (max-width: 600px) {
   #app {
@@ -162,6 +281,42 @@ body {
   .main-btn {
     padding: 12px 18px;
     font-size: 1rem;
+  }
+  
+  .profile-card {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .profile-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .quick-amounts {
+    grid-template-columns: 1fr;
+  }
+  
+  .header h2 {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .logo {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .brand {
+    font-size: 1.8rem;
+  }
+  
+  .slogan {
+    font-size: 1rem;
+  }
+  
+  .menu-btn {
+    padding: 14px 20px;
   }
 }
 
@@ -208,45 +363,530 @@ body {
   height: 120px;
 }
 
-/* Улучшение карточек тарифов */
-/* Современные карточки тарифов */
-.tariff-card {
-  background: linear-gradient(135deg, #222a3a 60%, #181c2a 100%);
+/* Заголовки экранов */
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 0 4px;
+}
+
+.header h2 {
+  flex: 1;
+  text-align: center;
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #00e6ff;
+}
+
+.back-btn {
+  background: rgba(0, 230, 255, 0.1);
+  border: 1px solid rgba(0, 230, 255, 0.3);
+  color: #00e6ff;
+  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.back-btn:hover {
+  background: rgba(0, 230, 255, 0.2);
+  transform: scale(1.05);
+}
+
+/* Главное меню */
+.welcome-text {
+  color: #b8c5d1;
+  margin-bottom: 32px;
+  font-size: 1rem;
+}
+
+.menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.menu-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  text-align: left;
+  justify-content: flex-start;
+}
+
+.btn-icon {
+  font-size: 1.2rem;
+  opacity: 0.8;
+}
+
+/* Профиль */
+.profile-card {
+  background: linear-gradient(135deg, #222a3a 0%, #181c2a 100%);
   border-radius: 20px;
-  box-shadow: 0 2px 16px rgba(0,230,255,0.10);
-  padding: 22px 16px;
-  margin: 16px 0;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 230, 255, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.profile-avatar {
+  flex-shrink: 0;
+}
+
+.avatar-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00e6ff 0%, #0057ff 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0, 230, 255, 0.3);
+}
+
+.avatar-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.profile-details {
+  flex: 1;
+}
+
+.profile-name {
+  margin: 0 0 8px 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.profile-id {
+  margin: 0 0 8px 0;
+  color: #b8c5d1;
+  font-size: 0.9rem;
+}
+
+.status-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-label {
+  color: #b8c5d1;
+  font-size: 0.9rem;
+}
+
+.sub-status {
+  color: #00e6ff;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.profile-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-item {
+  background: rgba(0, 230, 255, 0.05);
+  border: 1px solid rgba(0, 230, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+}
+
+.stat-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #00e6ff;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: #b8c5d1;
+}
+
+/* VPN заказы */
+.orders-container {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.vpn-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.vpn-card {
+  background: linear-gradient(135deg, #222a3a 0%, #181c2a 100%);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 16px rgba(0, 230, 255, 0.08);
+  border: 1px solid rgba(0, 230, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.vpn-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 230, 255, 0.15);
+}
+
+.vpn-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.vpn-icon {
+  font-size: 1.5rem;
+  opacity: 0.8;
+}
+
+.vpn-info {
+  flex: 1;
+}
+
+.vpn-plan {
+  margin: 0 0 4px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.vpn-country {
+  margin: 0;
+  color: #b8c5d1;
+  font-size: 0.9rem;
+}
+
+.vpn-status {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.vpn-status.active {
+  background: rgba(0, 255, 0, 0.2);
+  color: #00ff00;
+  border: 1px solid rgba(0, 255, 0, 0.3);
+}
+
+.vpn-details {
+  margin-bottom: 16px;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.detail-label {
+  color: #b8c5d1;
+  font-size: 0.9rem;
+}
+
+.detail-value {
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.copy-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Состояния загрузки и ошибок */
+.loading {
   display: flex;
   flex-direction: column;
   align-items: center;
-  transition: box-shadow 0.22s, transform 0.22s;
-  position: relative;
-  overflow: hidden;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
 }
-.tariff-card:hover {
-  box-shadow: 0 8px 32px rgba(0,230,255,0.22);
-  transform: translateY(-2px) scale(1.04);
-}
-.tariff-card::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 0;
-  height: 0;
-  background: rgba(0,230,255,0.08);
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(0, 230, 255, 0.2);
+  border-top: 3px solid #00e6ff;
   border-radius: 50%;
-  transform: translate(-50%, -50%);
-  transition: width 0.4s, height 0.4s;
-  z-index: 0;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
 }
-.tariff-card:active::before {
-  width: 140px;
-  height: 140px;
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
-.tariff-img {
-  width: 56px;
-  height: 56px;
+
+.empty-state, .error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.empty-icon, .error-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.empty-state h3, .error-state h3 {
+  margin: 0 0 8px 0;
+  color: #fff;
+  font-size: 1.2rem;
+}
+
+.empty-state p, .error-state p {
+  margin: 0 0 20px 0;
+  color: #b8c5d1;
+  font-size: 0.9rem;
+}
+
+/* Пополнение */
+.topup-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.balance-card {
+  background: linear-gradient(135deg, #222a3a 0%, #181c2a 100%);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 4px 16px rgba(0, 230, 255, 0.08);
+}
+
+.balance-icon {
+  font-size: 2rem;
+  opacity: 0.8;
+}
+
+.balance-info h3 {
+  margin: 0 0 4px 0;
+  color: #b8c5d1;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.balance-amount {
+  margin: 0;
+  color: #00e6ff;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.topup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  color: #b8c5d1;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.form-input {
+  background: rgba(0, 230, 255, 0.05);
+  border: 1px solid rgba(0, 230, 255, 0.2);
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: #fff;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #00e6ff;
+  box-shadow: 0 0 0 2px rgba(0, 230, 255, 0.2);
+}
+
+.form-input::placeholder {
+  color: #6b7280;
+}
+
+.quick-amounts {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.amount-btn {
+  background: rgba(0, 230, 255, 0.1);
+  border: 1px solid rgba(0, 230, 255, 0.2);
+  color: #00e6ff;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.amount-btn:hover {
+  background: rgba(0, 230, 255, 0.2);
+  transform: scale(1.02);
+}
+
+.submit-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* Результаты */
+.result-container {
+  margin-top: 20px;
+}
+
+.loading-state, .success-state, .error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.loading-state {
+  background: rgba(0, 230, 255, 0.05);
+  border: 1px solid rgba(0, 230, 255, 0.1);
+}
+
+.success-state {
+  background: rgba(0, 255, 0, 0.05);
+  border: 1px solid rgba(0, 255, 0, 0.2);
+}
+
+.error-state {
+  background: rgba(255, 0, 0, 0.05);
+  border: 1px solid rgba(255, 0, 0, 0.2);
+}
+
+.success-icon, .error-icon {
+  font-size: 2rem;
   margin-bottom: 12px;
-  z-index: 1;
+}
+
+.success-state h3 {
+  color: #00ff00;
+  margin: 0 0 8px 0;
+}
+
+.error-state h3 {
+  color: #ff4444;
+  margin: 0 0 8px 0;
+}
+
+.success-state p, .error-state p {
+  color: #b8c5d1;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Промокоды */
+.promo-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.promo-card {
+  background: linear-gradient(135deg, #222a3a 0%, #181c2a 100%);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(0, 230, 255, 0.08);
+}
+
+.promo-icon {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+}
+
+.promo-card h3 {
+  margin: 0 0 8px 0;
+  color: #fff;
+  font-size: 1.2rem;
+}
+
+.promo-card p {
+  margin: 0;
+  color: #b8c5d1;
+  font-size: 0.9rem;
+}
+
+.promo-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.promo-info {
+  background: rgba(0, 230, 255, 0.05);
+  border: 1px solid rgba(0, 230, 255, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.promo-info h4 {
+  margin: 0 0 12px 0;
+  color: #00e6ff;
+  font-size: 1rem;
+}
+
+.promo-info ul {
+  margin: 0;
+  padding-left: 20px;
+  color: #b8c5d1;
+  font-size: 0.9rem;
+}
+
+.promo-info li {
+  margin-bottom: 4px;
 }

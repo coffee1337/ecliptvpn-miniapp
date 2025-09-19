@@ -1,4 +1,18 @@
-<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-<circle cx="32" cy="24" r="12" fill="#00e6ff" fill-opacity="0.7"/>
-<ellipse cx="32" cy="44" rx="16" ry="10" fill="#181c2a" stroke="#00e6ff" stroke-width="2"/>
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="userGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00e6ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0057ff;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- User head -->
+  <circle cx="12" cy="8" r="4" fill="url(#userGradient)"/>
+  
+  <!-- User body -->
+  <path d="M6 20 C6 16 8 14 12 14 C16 14 18 16 18 20" 
+        stroke="url(#userGradient)" 
+        stroke-width="2" 
+        fill="none" 
+        stroke-linecap="round"/>
 </svg>

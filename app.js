@@ -1,7 +1,7 @@
-// EcliptVPN Mini App
+// Telegram Mini App: EcliptVPN
 console.log('Инициализация приложения...');
 
-// Глобальные переменные
+// Глобальные переменные и инициализация
 const app = document.getElementById('app');
 const overlays = document.getElementById('ui-overlays');
 const hasWebApp = Boolean(window.Telegram?.WebApp);
@@ -42,33 +42,29 @@ function hideTooltip(tooltip) {
   }
 }
 
-// Вспомогательные функции
-function addTooltipHandlers(element, text) {
-  if (!element) return;
-  
-  let currentTooltip = null;
-  
-  element.addEventListener('mouseenter', () => {
-    currentTooltip = showTooltip(element, text);
-  });
-  
-  element.addEventListener('mouseleave', () => {
-    hideTooltip(currentTooltip);
-  });
-  
-  element.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    currentTooltip = showTooltip(element, text);
-  });
-  
-  element.addEventListener('touchend', () => {
-    hideTooltip(currentTooltip);
-  });
+// Анимация клика
+function addClickAnimation(element) {
+  element.style.transform = 'scale(0.95)';
+  setTimeout(() => {
+    element.style.transform = '';
+  }, 150);
+}
+
+// Плавный переход между экранами
+function transitionToScreen(callback) {
+  const currentScreen = app.querySelector('.screen.active');
+  if (currentScreen) {
+    currentScreen.style.opacity = '0';
+    currentScreen.style.transform = 'translateX(20px)';
+    setTimeout(callback, 200);
+  } else {
+    callback();
+  }
 }
 
 // Основные экраны
 async function showMainMenu(user) {
-  console.log('Открываем главное меню для:', user);
+  console.log('Открываем главное меню');
   app.innerHTML = '';
   
   const mainMenu = document.createElement('section');
@@ -76,57 +72,97 @@ async function showMainMenu(user) {
   mainMenu.className = 'screen active';
   
   mainMenu.innerHTML = `
-    <h2>Главное меню</h2>
-    <p>Добро пожаловать, <b>${user?.first_name || 'Гость'}</b>!</p>
+    <div class="header">
+      <h2>EcliptVPN</h2>
+      <p class="welcome-text">Добро пожаловать, <b>${user?.first_name || 'Гость'}</b>!</p>
+    </div>
     <div class="menu-buttons">
-      <button class="main-btn" id="profileBtn">Профиль</button>
-      <button class="main-btn" id="ordersBtn">Мои VPN</button>
-      <button class="main-btn" id="topupBtn">Пополнить</button>
-      <button class="main-btn" id="promoBtn">Промокод</button>
+      <button class="main-btn menu-btn" id="profileBtn">
+        <span class="btn-icon">👤</span>
+        <span>Профиль</span>
+      </button>
+      <button class="main-btn menu-btn" id="ordersBtn">
+        <span class="btn-icon">🔒</span>
+        <span>Мои VPN</span>
+      </button>
+      <button class="main-btn menu-btn" id="topupBtn">
+        <span class="btn-icon">💳</span>
+        <span>Пополнить</span>
+      </button>
+      <button class="main-btn menu-btn" id="promoBtn">
+        <span class="btn-icon">🎁</span>
+        <span>Промокод</span>
+      </button>
     </div>
   `;
   
   app.appendChild(mainMenu);
 
-  // Назначаем обработчики
-  mainMenu.querySelector('#profileBtn').onclick = () => showProfile(user);
-  mainMenu.querySelector('#ordersBtn').onclick = () => showOrders(user);
-  mainMenu.querySelector('#topupBtn').onclick = () => showTopup(user);
-  mainMenu.querySelector('#promoBtn').onclick = () => showPromo(user);
+  // Назначаем обработчики с анимацией
+  mainMenu.querySelector('#profileBtn').onclick = () => {
+    addClickAnimation(mainMenu.querySelector('#profileBtn'));
+    setTimeout(() => showProfile(user), 150);
+  };
+  mainMenu.querySelector('#ordersBtn').onclick = () => {
+    addClickAnimation(mainMenu.querySelector('#ordersBtn'));
+    setTimeout(() => showOrders(user), 150);
+  };
+  mainMenu.querySelector('#topupBtn').onclick = () => {
+    addClickAnimation(mainMenu.querySelector('#topupBtn'));
+    setTimeout(() => showTopup(user), 150);
+  };
+  mainMenu.querySelector('#promoBtn').onclick = () => {
+    addClickAnimation(mainMenu.querySelector('#promoBtn'));
+    setTimeout(() => showPromo(user), 150);
+  };
 }
 
 async function showProfile(user) {
-  app.innerHTML = '';
-  const screen = document.createElement('section');
-  screen.id = 'profile';
-  screen.className = 'screen active';
+  transitionToScreen(() => {
+    app.innerHTML = '';
+    const screen = document.createElement('section');
+    screen.id = 'profile';
+    screen.className = 'screen active profile';
+    
+    screen.innerHTML = `
+      <div class="header">
+        <button class="back-btn" id="backBtn">←</button>
+        <h2>Профиль</h2>
+      </div>
+      <div class="profile-card">
+        <div class="profile-avatar">
+          <div class="avatar-circle">
+            <span class="avatar-text">${(user.first_name || 'Г').charAt(0).toUpperCase()}</span>
+          </div>
+        </div>
+        <div class="profile-details">
+          <h3 class="profile-name">${user.first_name || ''} ${user.last_name || ''}</h3>
+          <p class="profile-id">ID: ${user.id}</p>
+          <div class="status-container">
+            <span class="status-label">Статус:</span>
+            <span class="sub-status">Загрузка...</span>
+          </div>
+        </div>
+      </div>
+      <div class="profile-stats">
+        <div class="stat-item">
+          <span class="stat-value">0</span>
+          <span class="stat-label">Активных VPN</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">₽0</span>
+          <span class="stat-label">Баланс</span>
+        </div>
+      </div>
+    `;
+    
+    app.appendChild(screen);
+    screen.querySelector('#backBtn').onclick = () => {
+      addClickAnimation(screen.querySelector('#backBtn'));
+      setTimeout(() => showMainMenu(user), 150);
+    };
+  });
   
-  screen.innerHTML = `
-    <h2>Профиль</h2>
-    <div class="profile-info">
-      <img src="assets/user.svg" class="profile-img" />
-      <p><b>${user.first_name || ''} ${user.last_name || ''}</b></p>
-      <p>ID: ${user.id}</p>
-      <p>Статус: <span class="sub-status">Загрузка...</span></p>
-      <div class="info-icon" title="Информация">ℹ️</div>
-    </div>
-    <div class="orders-history">
-      <h3>История заказов</h3>
-      <ul><li>Загрузка...</li></ul>
-    </div>
-    <button class="main-btn" id="backBtn">Назад</button>
-  `;
-  
-  app.appendChild(screen);
-  
-  // Обработчики
-  screen.querySelector('#backBtn').onclick = () => showMainMenu(user);
-  addTooltipHandlers(
-    screen.querySelector('.info-icon'),
-    'В профиле отображается статус подписки и история заказов.'
-  );
-  
-  // Загрузка данных
   try {
     const res = await fetch('https://your-bot-backend/api/profile?user_id=' + user.id, {
       headers: hasWebApp ? { 'X-Telegram-InitData': window.Telegram.WebApp.initData } : {}
@@ -136,33 +172,38 @@ async function showProfile(user) {
     if (data.subscription) {
       screen.querySelector('.sub-status').textContent = data.subscription.status;
     }
-    
-    if (Array.isArray(data.orders)) {
-      const ul = screen.querySelector('.orders-history ul');
-      ul.innerHTML = data.orders.map(o => 
-        `<li>${o.date} — ${o.plan} — ${o.price}₽ — ${o.status}</li>`
-      ).join('') || '<li>Нет заказов</li>';
-    }
   } catch (e) {
     console.error('Ошибка загрузки профиля:', e);
-    showToast('Ошибка загрузки данных профиля');
+    screen.querySelector('.sub-status').textContent = 'Ошибка загрузки';
   }
 }
 
 async function showOrders(user) {
-  app.innerHTML = '';
-  const screen = document.createElement('section');
-  screen.id = 'orders';
-  screen.className = 'screen active';
-  
-  screen.innerHTML = `
-    <h2>Мои VPN</h2>
-    <div id="ordersList">Загрузка...</div>
-    <button class="main-btn" id="backBtn">Назад</button>
-  `;
-  
-  app.appendChild(screen);
-  screen.querySelector('#backBtn').onclick = () => showMainMenu(user);
+  transitionToScreen(() => {
+    app.innerHTML = '';
+    const screen = document.createElement('section');
+    screen.id = 'orders';
+    screen.className = 'screen active orders';
+    
+    screen.innerHTML = `
+      <div class="header">
+        <button class="back-btn" id="backBtn">←</button>
+        <h2>Мои VPN</h2>
+      </div>
+      <div class="orders-container">
+        <div id="ordersList" class="loading">
+          <div class="loading-spinner"></div>
+          <p>Загрузка VPN...</p>
+        </div>
+      </div>
+    `;
+    
+    app.appendChild(screen);
+    screen.querySelector('#backBtn').onclick = () => {
+      addClickAnimation(screen.querySelector('#backBtn'));
+      setTimeout(() => showMainMenu(user), 150);
+    };
+  });
   
   try {
     const res = await fetch('https://your-bot-backend/api/orders?user_id=' + user.id, {
@@ -173,12 +214,25 @@ async function showOrders(user) {
     const list = screen.querySelector('#ordersList');
     
     if (Array.isArray(data.orders) && data.orders.length) {
+      list.className = 'vpn-list';
       list.innerHTML = data.orders.map(o => `
         <div class="vpn-card">
-          <b>${o.plan}</b>
-          <p>Страна: ${o.country}</p>
-          <p>Действует до: ${o.expiry}</p>
+          <div class="vpn-header">
+            <div class="vpn-icon">🔒</div>
+            <div class="vpn-info">
+              <h3 class="vpn-plan">${o.plan}</h3>
+              <p class="vpn-country">${o.country}</p>
+            </div>
+            <div class="vpn-status active">Активен</div>
+          </div>
+          <div class="vpn-details">
+            <div class="detail-item">
+              <span class="detail-label">Действует до:</span>
+              <span class="detail-value">${o.expiry}</span>
+            </div>
+          </div>
           <button class="main-btn copy-btn" data-config="${o.config}">
+            <span class="btn-icon">📋</span>
             Скопировать конфиг
           </button>
         </div>
@@ -193,43 +247,98 @@ async function showOrders(user) {
         };
       });
     } else {
-      list.innerHTML = '<p>У вас нет активных VPN</p>';
+      list.className = 'empty-state';
+      list.innerHTML = `
+        <div class="empty-icon">🔒</div>
+        <h3>Нет активных VPN</h3>
+        <p>У вас пока нет активных VPN подключений</p>
+        <button class="main-btn" onclick="showTopup(${JSON.stringify(user).replace(/"/g, '&quot;')})">
+          Купить VPN
+        </button>
+      `;
     }
   } catch (e) {
     console.error('Ошибка загрузки VPN:', e);
-    screen.querySelector('#ordersList').innerHTML = '<p>Ошибка загрузки VPN</p>';
+    screen.querySelector('#ordersList').className = 'error-state';
+    screen.querySelector('#ordersList').innerHTML = `
+      <div class="error-icon">⚠️</div>
+      <h3>Ошибка загрузки</h3>
+      <p>Не удалось загрузить список VPN</p>
+    `;
   }
 }
 
 async function showTopup(user) {
-  app.innerHTML = '';
-  const screen = document.createElement('section');
-  screen.id = 'topup';
-  screen.className = 'screen active';
+  transitionToScreen(() => {
+    app.innerHTML = '';
+    const screen = document.createElement('section');
+    screen.id = 'topup';
+    screen.className = 'screen active';
   
   screen.innerHTML = `
-    <h2>Пополнение баланса</h2>
-    <form id="topupForm">
-      <label>
-        Сумма (₽):
-        <input type="number" min="10" max="10000" required id="amount" />
-      </label>
-      <button type="submit" class="main-btn">Оплатить</button>
-    </form>
-    <div id="topupResult"></div>
-    <button class="main-btn" id="backBtn">Назад</button>
+    <div class="header">
+      <button class="back-btn" id="backBtn">←</button>
+      <h2>Пополнение</h2>
+    </div>
+    <div class="topup-container">
+      <div class="balance-card">
+        <div class="balance-icon">💰</div>
+        <div class="balance-info">
+          <h3>Текущий баланс</h3>
+          <p class="balance-amount">₽0</p>
+        </div>
+      </div>
+      
+      <form id="topupForm" class="topup-form">
+        <div class="form-group">
+          <label for="amount" class="form-label">Сумма пополнения (₽)</label>
+          <input type="number" min="10" max="10000" required id="amount" class="form-input" placeholder="Введите сумму" />
+        </div>
+        
+        <div class="quick-amounts">
+          <button type="button" class="amount-btn" data-amount="100">₽100</button>
+          <button type="button" class="amount-btn" data-amount="500">₽500</button>
+          <button type="button" class="amount-btn" data-amount="1000">₽1000</button>
+          <button type="button" class="amount-btn" data-amount="2000">₽2000</button>
+        </div>
+        
+        <button type="submit" class="main-btn submit-btn">
+          <span class="btn-icon">💳</span>
+          <span>Оплатить</span>
+        </button>
+      </form>
+      
+      <div id="topupResult" class="result-container"></div>
+    </div>
   `;
+    
+    app.appendChild(screen);
+    
+    // Обработчики
+    screen.querySelector('#backBtn').onclick = () => {
+      addClickAnimation(screen.querySelector('#backBtn'));
+      setTimeout(() => showMainMenu(user), 150);
+    };
+    
+    // Быстрые суммы
+  screen.querySelectorAll('.amount-btn').forEach(btn => {
+    btn.onclick = () => {
+      screen.querySelector('#amount').value = btn.dataset.amount;
+    };
+  });
   
-  app.appendChild(screen);
-  
-  // Обработчики
-  screen.querySelector('#backBtn').onclick = () => showMainMenu(user);
   screen.querySelector('#topupForm').onsubmit = async (e) => {
     e.preventDefault();
     const amount = screen.querySelector('#amount').value;
     const result = screen.querySelector('#topupResult');
     
-    result.textContent = 'Создание платежа...';
+    result.innerHTML = `
+      <div class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Создание платежа...</p>
+      </div>
+    `;
+    
     try {
       const res = await fetch('https://your-bot-backend/api/topup', {
         method: 'POST',
@@ -243,49 +352,102 @@ async function showTopup(user) {
       const data = await res.json();
       if (data.success && data.pay_url) {
         result.innerHTML = `
-          <a href="${data.pay_url}" target="_blank" class="main-btn">
-            Перейти к оплате
-          </a>
+          <div class="success-state">
+            <div class="success-icon">✅</div>
+            <h3>Платеж создан</h3>
+            <p>Сумма: ₽${amount}</p>
+            <a href="${data.pay_url}" target="_blank" class="main-btn">
+              <span class="btn-icon">🔗</span>
+              Перейти к оплате
+            </a>
+          </div>
         `;
       } else {
-        result.textContent = 'Ошибка создания платежа';
+        result.innerHTML = `
+          <div class="error-state">
+            <div class="error-icon">❌</div>
+            <h3>Ошибка</h3>
+            <p>Не удалось создать платеж</p>
+          </div>
+        `;
       }
     } catch (e) {
       console.error('Ошибка пополнения:', e);
-      result.textContent = 'Ошибка связи с сервером';
+      result.innerHTML = `
+        <div class="error-state">
+          <div class="error-icon">⚠️</div>
+          <h3>Ошибка связи</h3>
+          <p>Проверьте подключение к интернету</p>
+        </div>
+      `;
     }
   };
+  });
 }
 
 async function showPromo(user) {
-  app.innerHTML = '';
-  const screen = document.createElement('section');
-  screen.id = 'promo';
-  screen.className = 'screen active';
+  transitionToScreen(() => {
+    app.innerHTML = '';
+    const screen = document.createElement('section');
+    screen.id = 'promo';
+    screen.className = 'screen active';
   
   screen.innerHTML = `
-    <h2>Активация промокода</h2>
-    <form id="promoForm">
-      <label>
-        Промокод:
-        <input type="text" required id="code" pattern="[A-Za-z0-9]+" />
-      </label>
-      <button type="submit" class="main-btn">Активировать</button>
-    </form>
-    <div id="promoResult"></div>
-    <button class="main-btn" id="backBtn">Назад</button>
+    <div class="header">
+      <button class="back-btn" id="backBtn">←</button>
+      <h2>Промокод</h2>
+    </div>
+    <div class="promo-container">
+      <div class="promo-card">
+        <div class="promo-icon">🎁</div>
+        <h3>Активация промокода</h3>
+        <p>Введите промокод для получения бонусов</p>
+      </div>
+      
+      <form id="promoForm" class="promo-form">
+        <div class="form-group">
+          <label for="code" class="form-label">Промокод</label>
+          <input type="text" required id="code" class="form-input" pattern="[A-Za-z0-9]+" placeholder="Введите промокод" />
+        </div>
+        
+        <button type="submit" class="main-btn submit-btn">
+          <span class="btn-icon">✨</span>
+          <span>Активировать</span>
+        </button>
+      </form>
+      
+      <div id="promoResult" class="result-container"></div>
+      
+      <div class="promo-info">
+        <h4>Как получить промокод?</h4>
+        <ul>
+          <li>Подпишитесь на наш канал</li>
+          <li>Участвуйте в акциях</li>
+          <li>Приглашайте друзей</li>
+        </ul>
+      </div>
+    </div>
   `;
   
-  app.appendChild(screen);
-  
-  // Обработчики
-  screen.querySelector('#backBtn').onclick = () => showMainMenu(user);
+    app.appendChild(screen);
+    
+    // Обработчики
+    screen.querySelector('#backBtn').onclick = () => {
+      addClickAnimation(screen.querySelector('#backBtn'));
+      setTimeout(() => showMainMenu(user), 150);
+    };
   screen.querySelector('#promoForm').onsubmit = async (e) => {
     e.preventDefault();
     const code = screen.querySelector('#code').value;
     const result = screen.querySelector('#promoResult');
     
-    result.textContent = 'Проверка промокода...';
+    result.innerHTML = `
+      <div class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Проверка промокода...</p>
+      </div>
+    `;
+    
     try {
       const res = await fetch('https://your-bot-backend/api/promo', {
         method: 'POST',
@@ -297,14 +459,36 @@ async function showPromo(user) {
       });
       
       const data = await res.json();
-      result.textContent = data.success
-        ? 'Промокод успешно активирован!'
-        : 'Ошибка: ' + (data.error || 'Промокод не найден');
+      if (data.success) {
+        result.innerHTML = `
+          <div class="success-state">
+            <div class="success-icon">🎉</div>
+            <h3>Промокод активирован!</h3>
+            <p>${data.message || 'Бонус добавлен на ваш баланс'}</p>
+          </div>
+        `;
+        screen.querySelector('#code').value = '';
+      } else {
+        result.innerHTML = `
+          <div class="error-state">
+            <div class="error-icon">❌</div>
+            <h3>Ошибка</h3>
+            <p>${data.error || 'Промокод не найден или уже использован'}</p>
+          </div>
+        `;
+      }
     } catch (e) {
       console.error('Ошибка активации промокода:', e);
-      result.textContent = 'Ошибка связи с сервером';
+      result.innerHTML = `
+        <div class="error-state">
+          <div class="error-icon">⚠️</div>
+          <h3>Ошибка связи</h3>
+          <p>Проверьте подключение к интернету</p>
+        </div>
+      `;
     }
   };
+  });
 }
 
 // Обработчик кнопки "Начать"
@@ -317,7 +501,7 @@ function attachStartHandler() {
 
   console.log('Нашли кнопку, привязываем обработчик...');
   
-  // Новый обработчик
+  // Назначаем обработчик
   startBtn.onclick = async () => {
     console.log('Кнопка "Начать" нажата');
     try {
