@@ -1,0 +1,141 @@
+body {
+  margin: 0;
+  font-family: 'Inter', Arial, sans-serif;
+  background: linear-gradient(135deg, #181c2a 0%, #2e3a5e 100%);
+  color: #fff;
+  min-height: 100vh;
+}
+#app {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+.screen {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  animation: fadeIn 0.7s;
+}
+.screen.active {
+  display: flex;
+}
+.logo-anim {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 32px;
+  animation: logoBounce 1.2s;
+}
+.logo {
+  width: 96px;
+  height: 96px;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 0 16px #00e6ff);
+}
+.brand {
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #00e6ff;
+}
+.slogan {
+  font-size: 1.1rem;
+  color: #fff;
+  opacity: 0.8;
+  margin-bottom: 16px;
+}
+.main-btn {
+  background: linear-gradient(90deg, #00e6ff 0%, #0057ff 100%);
+  color: #fff;
+  border: none;
+  border-radius: 24px;
+  padding: 14px 36px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 24px rgba(0, 230, 255, 0.15);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.main-btn:active {
+  transform: scale(0.97);
+  box-shadow: 0 2px 12px rgba(0, 230, 255, 0.25);
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes logoBounce {
+  0% { transform: scale(0.7); }
+  60% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+/* Модальные окна */
+.modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(24, 28, 42, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.4s;
+}
+.modal-content {
+  background: #222a3a;
+  border-radius: 20px;
+  padding: 32px 24px;
+  box-shadow: 0 8px 32px rgba(0, 230, 255, 0.12);
+  text-align: center;
+  min-width: 260px;
+  max-width: 90vw;
+}
+/* Анимация успешной оплаты */
+.success-anim {
+  width: 64px;
+  height: 64px;
+  margin: 16px auto;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00e6ff 60%, #0057ff 100%);
+  position: relative;
+  animation: pulse 1.2s infinite;
+}
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 #00e6ff44; }
+  70% { box-shadow: 0 0 0 16px #00e6ff00; }
+  100% { box-shadow: 0 0 0 0 #00e6ff44; }
+}
+/* Всплывающие уведомления */
+.toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0057ff;
+  color: #fff;
+  padding: 12px 32px;
+  border-radius: 24px;
+  box-shadow: 0 2px 16px rgba(0, 87, 255, 0.18);
+  font-size: 1rem;
+  opacity: 0;
+  animation: toastIn 0.5s forwards;
+  z-index: 2000;
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(24px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+/* Адаптивность */
+@media (max-width: 600px) {
+  #app {
+    padding: 0 4px;
+  }
+  .modal-content {
+    padding: 20px 8px;
+  }
+  .main-btn {
+    padding: 12px 18px;
+    font-size: 1rem;
+  }
+}
