@@ -69,28 +69,78 @@ body::before {
   border-right: 1px solid var(--border);
 }
 
+/* Контейнер приложения */
+.app-container {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
 /* Экраны */
 .screen {
-  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
   flex-direction: column;
-  min-height: 100vh;
   padding: 20px;
-  animation: screenSlideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  padding-bottom: 100px; /* Отступ для нижней навигации */
+  opacity: 0;
+  transform: translateX(100%);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .screen.active {
-  display: flex;
+  opacity: 1;
+  transform: translateX(0);
 }
 
-@keyframes screenSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(30px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+.screen.slide-out {
+  opacity: 0;
+  transform: translateX(-100%);
+}
+
+/* Приветственный экран */
+.welcome-screen {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.welcome-content {
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.logo-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+  animation: logoFloat 3s ease-in-out infinite;
+}
+
+.brand {
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+}
+
+.slogan {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin-bottom: 40px;
+}
+
+.start-btn {
+  font-size: 1.1rem;
+  padding: 16px 32px;
 }
 
 /* Заголовки */
