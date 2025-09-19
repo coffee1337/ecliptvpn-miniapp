@@ -1,47 +1,92 @@
+// UI-функции
+function showToast(message) {
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = message;
+  overlays.appendChild(toast);
+  setTimeout(() => toast.remove(), 2500);
+}
+
 // Главный экран меню
 async function showMainMenu(user) {
+  console.log('Открываем главное меню для пользователя:', user);
   app.innerHTML = '';
   const mainMenu = document.createElement('section');
   mainMenu.id = 'mainMenu';
   mainMenu.className = 'screen active';
-  mainMenu.innerHTML = `<h2>Главное меню</h2><p>Добро пожаловать, <b>${user?.first_name || 'Гость'}</b>!</p><button class="main-btn" id="profileBtn">Профиль</button>`;
+  mainMenu.innerHTML = `
+    <h2>Главное меню</h2>
+    <p>Добро пожаловать, <b>${user?.first_name || 'Гость'}</b>!</p>
+    <div class="menu-buttons">
+      <button class="main-btn" id="profileBtn">Профиль</button>
+      <button class="main-btn" id="ordersBtn">Мои VPN</button>
+      <button class="main-btn" id="topupBtn">Пополнить</button>
+      <button class="main-btn" id="promoBtn">Промокод</button>
+    </div>
+  `;
   app.appendChild(mainMenu);
-  // Пример перехода в профиль
+
+  // Назначаем обработчики кнопок
   mainMenu.querySelector('#profileBtn').onclick = () => loadProfile(user);
+  mainMenu.querySelector('#ordersBtn').onclick = () => showOrders(user);
+  mainMenu.querySelector('#topupBtn').onclick = () => showTopup(user);
+  mainMenu.querySelector('#promoBtn').onclick = () => showPromo(user);
 }
 // Telegram Mini App: EcliptVPN
-console.log('app.js загружен');
-const app = document.getElementById('app');
+console.log('Инициализация приложения...');
 
+// Глобальные переменные
+const app = document.getElementById('app');
+const overlays = document.getElementById('ui-overlays');
+
+// Инициализация Telegram WebApp
+let hasWebApp = false;
+if (window.Telegram?.WebApp) {
+  hasWebApp = true;
+  window.Telegram.WebApp.ready();
+  console.log('Telegram WebApp доступен');
+}
+
+// Функция привязки обработчика к кнопке
 function attachStartHandler() {
   const startBtn = document.getElementById('startBtn');
-  if (!startBtn) return false;
-  // Удаляем предыдущий обработчик, если был
+  if (!startBtn) {
+    console.warn('Кнопка #startBtn не найдена');
+    return false;
+  }
+
+  console.log('Нашли кнопку, привязываем обработчик...');
+  
+  // Очищаем старый обработчик
   startBtn.onclick = null;
-  startBtn.addEventListener('click', async (e) => {
+  
+  // Добавляем новый обработчик
+  startBtn.onclick = async () => {
     console.log('Кнопка "Начать" нажата');
     try {
-      if (window.Telegram && window.Telegram.WebApp) {
-        if (typeof window.Telegram.WebApp.expand === 'function') {
-          window.Telegram.WebApp.expand();
-        }
-        const user = window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user;
+      // В Telegram WebApp
+      if (hasWebApp) {
+        window.Telegram.WebApp.expand();
+        const user = window.Telegram.WebApp.initDataUnsafe?.user;
         if (user) {
           await showMainMenu(user);
         } else {
-          console.warn('Пользователь не инициирован через Telegram WebApp.');
-          // В режиме разработки можно показать заглушку
+          console.log('Нет данных пользователя, показываем тестовый режим');
           await showMainMenu({ first_name: 'Тест', id: 0 });
         }
-      } else {
-        console.warn('Telegram WebApp не доступен. Открыто вне Telegram.');
+      } 
+      // Открыто в обычном браузере
+      else {
+        console.log('Режим разработки');
         await showMainMenu({ first_name: 'Гость', id: 0 });
       }
     } catch (err) {
-      console.error('Ошибка в обработчике startBtn:', err);
+      console.error('Ошибка:', err);
+      showToast('Не удалось загрузить меню');
     }
-  });
-  console.log('Обработчик для #startBtn прикреплён');
+  };
+
+  console.log('Обработчик успешно установлен');
   return true;
 }
 
@@ -315,15 +360,41 @@ async function showPromo(user) {
   };
 }
 
-// Всплывающие подсказки, уведомления, анимации и безопасность передачи данных реализуются в следующих шагах.
+// Инициализация приложения
+console.log('Пытаемся прикрепить обработчик при загрузке...');
 
-// Всплывающее уведомление
-function showToast(message) {
-  const toast = document.createElement('div');
-  toast.className = 'toast';
-  toast.textContent = message;
-  overlays.appendChild(toast);
-  setTimeout(() => toast.remove(), 2500);
+// Пробуем сразу
+if (!attachStartHandler()) {
+  console.log('Кнопка не найдена, ждём загрузку DOM...');
+  
+  // Попробуем после полной загрузки страницы
+  window.addEventListener('load', () => {
+    console.log('Страница загружена, пробуем снова...');
+    if (!attachStartHandler()) {
+      console.log('Кнопка всё ещё не найдена, запускаем наблюдатель...');
+      
+      // Если кнопка появится позже - отловим через MutationObserver
+      const observer = new MutationObserver((mutations, obs) => {
+        if (attachStartHandler()) {
+          console.log('Кнопка найдена через MutationObserver');
+          obs.disconnect();
+        }
+      });
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+
+      // Тайм-аут, если кнопка так и не появится
+      setTimeout(() => {
+        const btn = document.getElementById('startBtn');
+        if (!btn) {
+          console.warn('Кнопка #startBtn не найдена даже после 5 секунд ожидания');
+        }
+      }, 5000);
+    }
+  });
 }
 
 // Всплывающая подсказка
