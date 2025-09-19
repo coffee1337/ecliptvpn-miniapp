@@ -8,7 +8,7 @@ async function loadProfile(user) {
   const profileScreen = document.createElement('section');
   profileScreen.id = 'profile';
   profileScreen.className = 'screen active';
-  profileScreen.innerHTML = `<h2>Личный кабинет <span class="info-icon" title="О профиле">ℹ️</span></h2><div class="profile-info"><img src="assets/user.svg" class="profile-img" /><p><b>${user.first_name || ''} ${user.last_name || ''}</b></p><p>ID: ${user.id}</p><p>Статус подписки: <span class="sub-status">...</span></p><button class="main-btn" id="backToTariffs">Назад к тарифам</button></div><div class="orders-history"><h3>История заказов</h3><ul></ul></div>`;
+  profileScreen.innerHTML = `<h2>Личный кабинет</h2><div class="profile-info"><img src="assets/user.svg" class="profile-img" /><p><b>${user.first_name || ''} ${user.last_name || ''}</b></p><p>ID: ${user.id}</p><p>Статус подписки: <span class="sub-status">Активна</span></p><button class="main-btn" id="backToTariffs">Назад к тарифам</button></div><div class="orders-history"><h3>История заказов</h3><ul></ul></div>`;
   app.appendChild(profileScreen);
   profileScreen.querySelector('#backToTariffs').onclick = () => loadTariffs(user);
   // Всплывающая подсказка для инфо-иконки
@@ -174,6 +174,85 @@ function loadProfile(user) {
     });
 }
 
+// Пополнение баланса
+async function showTopup(user) {
+  app.innerHTML = '';
+  const topupScreen = document.createElement('section');
+  topupScreen.className = 'screen active';
+  topupScreen.innerHTML = `
+    <h2>Пополнение баланса</h2>
+    <form id="topupForm">
+      <label>Сумма (₽): <input type="number" min="10" max="10000" required id="topupAmount" /></label>
+      <button class="main-btn" type="submit">Оплатить</button>
+    </form>
+    <div id="topupResult"></div>
+    <button class="main-btn" id="backBtn">Назад</button>
+  `;
+  app.appendChild(topupScreen);
+  topupScreen.querySelector('#backBtn').onclick = () => showMainMenu(user);
+  topupScreen.querySelector('#topupForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const amount = topupScreen.querySelector('#topupAmount').value;
+    const result = topupScreen.querySelector('#topupResult');
+    result.textContent = 'Создание платежа...';
+    try {
+      // Пример запроса к API для создания платежа
+      const res = await fetch('https://your-bot-backend/api/topup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Telegram-InitData': window.Telegram.WebApp.initData || '' },
+        body: JSON.stringify({ user_id: user.id, amount })
+      });
+      const data = await res.json();
+      if (data.success && data.pay_url) {
+        result.innerHTML = `<a href="${data.pay_url}" target="_blank" class="main-btn">Перейти к оплате</a>`;
+      } else {
+        result.textContent = 'Ошибка создания платежа.';
+      }
+    } catch {
+      result.textContent = 'Ошибка связи с сервером.';
+    }
+  };
+}
+
+// Активация промокода
+async function showPromo(user) {
+  app.innerHTML = '';
+  const promoScreen = document.createElement('section');
+  promoScreen.className = 'screen active';
+  promoScreen.innerHTML = `
+    <h2>Активация промокода</h2>
+    <form id="promoForm">
+      <label>Промокод: <input type="text" required id="promoCode" /></label>
+      <button class="main-btn" type="submit">Активировать</button>
+    </form>
+    <div id="promoResult"></div>
+    <button class="main-btn" id="backBtn">Назад</button>
+  `;
+  app.appendChild(promoScreen);
+  promoScreen.querySelector('#backBtn').onclick = () => showMainMenu(user);
+  promoScreen.querySelector('#promoForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const code = promoScreen.querySelector('#promoCode').value;
+    const result = promoScreen.querySelector('#promoResult');
+    result.textContent = 'Проверка промокода...';
+    try {
+      const res = await fetch('https://your-bot-backend/api/promo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Telegram-InitData': window.Telegram.WebApp.initData || '' },
+        body: JSON.stringify({ user_id: user.id, code })
+      });
+      const data = await res.json();
+      if (data.success) {
+        result.textContent = 'Промокод успешно активирован!';
+      } else {
+        result.textContent = 'Ошибка: ' + (data.error || 'Промокод не найден');
+      }
+    } catch {
+      result.textContent = 'Ошибка связи с сервером.';
+    }
+  };
+}
+
 // Всплывающие подсказки, уведомления, анимации и безопасность передачи данных реализуются в следующих шагах.
 
 // Всплывающее уведомление
@@ -202,4 +281,82 @@ function showTooltip(target, text) {
 function hideTooltip() {
   const tooltip = document.querySelector('.tooltip');
   if (tooltip) tooltip.classList.remove('active');
+}
+
+// Мои VPN
+async function showOrders(user) {
+  app.innerHTML = '';
+  const ordersScreen = document.createElement('section');
+  ordersScreen.className = 'screen active';
+  ordersScreen.innerHTML = `<h2>Мои VPN</h2><div id="ordersList">Загрузка...</div><button class="main-btn" id="backBtn">Назад</button>`;
+  app.appendChild(ordersScreen);
+  ordersScreen.querySelector('#backBtn').onclick = () => showMainMenu(user);
+  try {
+    const res = await fetch('https://your-bot-backend/api/orders?user_id=' + user.id, {
+      headers: { 'X-Telegram-InitData': window.Telegram.WebApp.initData || '' }
+    });
+    const data = await res.json();
+    const list = ordersScreen.querySelector('#ordersList');
+    if (Array.isArray(data.orders) && data.orders.length) {
+      list.innerHTML = data.orders.map(o => `<div class="vpn-card"><b>${o.plan}</b><br>Страна: ${o.country}<br>Действует до: ${o.expiry}<br><button class="main-btn" onclick="navigator.clipboard.writeText('${o.config}');showToast('Конфиг скопирован!')">Скопировать конфиг</button></div>`).join('');
+    } else {
+      list.textContent = 'У вас нет активных VPN.';
+    }
+  } catch {
+    ordersScreen.querySelector('#ordersList').textContent = 'Ошибка загрузки VPN.';
+  }
+}
+
+// История платежей
+async function showPayments(user) {
+  app.innerHTML = '';
+  const paymentsScreen = document.createElement('section');
+  paymentsScreen.className = 'screen active';
+  paymentsScreen.innerHTML = `<h2>История платежей</h2><ul id="paymentsList">Загрузка...</ul><button class="main-btn" id="backBtn">Назад</button>`;
+  app.appendChild(paymentsScreen);
+  paymentsScreen.querySelector('#backBtn').onclick = () => showMainMenu(user);
+  try {
+    const res = await fetch('https://your-bot-backend/api/payments?user_id=' + user.id, {
+      headers: { 'X-Telegram-InitData': window.Telegram.WebApp.initData || '' }
+    });
+    const data = await res.json();
+    const list = paymentsScreen.querySelector('#paymentsList');
+    if (Array.isArray(data.payments) && data.payments.length) {
+      list.innerHTML = data.payments.map(p => `<li>${p.date} — ${p.amount}₽ — ${p.status}</li>`).join('');
+    } else {
+      list.textContent = 'Нет платежей.';
+    }
+  } catch {
+    paymentsScreen.querySelector('#paymentsList').textContent = 'Ошибка загрузки платежей.';
+  }
+}
+
+// Помощь
+function showHelp(user) {
+  app.innerHTML = '';
+  const helpScreen = document.createElement('section');
+  helpScreen.className = 'screen active';
+  helpScreen.innerHTML = `<h2>Помощь</h2><div><b>FAQ:</b><ul><li>Как купить VPN?</li><li>Как пополнить баланс?</li><li>Как активировать промокод?</li></ul><p>Техподдержка: <a href="https://t.me/EcliptVPN" target="_blank">@EcliptVPN</a></p></div><button class="main-btn" id="backBtn">Назад</button>`;
+  app.appendChild(helpScreen);
+  helpScreen.querySelector('#backBtn').onclick = () => showMainMenu(user);
+}
+
+// Админ-панель
+async function showAdmin(user) {
+  app.innerHTML = '';
+  const adminScreen = document.createElement('section');
+  adminScreen.className = 'screen active';
+  adminScreen.innerHTML = `<h2>Админ-панель</h2><div id="adminPanel">Загрузка...</div><button class="main-btn" id="backBtn">Назад</button>`;
+  app.appendChild(adminScreen);
+  adminScreen.querySelector('#backBtn').onclick = () => showMainMenu(user);
+  try {
+    const res = await fetch('https://your-bot-backend/api/admin?user_id=' + user.id, {
+      headers: { 'X-Telegram-InitData': window.Telegram.WebApp.initData || '' }
+    });
+    const data = await res.json();
+    const panel = adminScreen.querySelector('#adminPanel');
+    panel.innerHTML = `<b>Пользователей:</b> ${data.users}<br><b>Активных VPN:</b> ${data.vpn}<br><b>Платежей:</b> ${data.payments}`;
+  } catch {
+    adminScreen.querySelector('#adminPanel').textContent = 'Ошибка загрузки данных.';
+  }
 }
