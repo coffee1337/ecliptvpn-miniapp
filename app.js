@@ -1,11 +1,15 @@
 // Telegram Mini App: EcliptVPN
 const app = document.getElementById('app');
 const startBtn = document.getElementById('startBtn');
+const overlays = document.getElementById('ui-overlays');
 
-// Screens
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  const el = document.getElementById(id);
+  if (el) {
+    el.classList.add('active');
+    el.scrollIntoView({ behavior: 'smooth' });
+  }
 }
 
 // Welcome screen logic
@@ -74,6 +78,14 @@ function loadTariffs(user) {
     loadProfile(user);
   };
 }
+      // Всплывающая подсказка для инфо-иконки
+      const infoIcon = tariffsScreen.querySelector('.info-icon');
+      if (infoIcon) {
+        infoIcon.addEventListener('mouseenter', () => showTooltip(infoIcon, 'Тарифы включают доступ к VPN, поддержку и безопасность.')); 
+        infoIcon.addEventListener('mouseleave', hideTooltip);
+        infoIcon.addEventListener('touchstart', () => showTooltip(infoIcon, 'Тарифы включают доступ к VPN, поддержку и безопасность.'));
+        infoIcon.addEventListener('touchend', hideTooltip);
+      }
 
 // Модальное окно оплаты
 function showPaymentModal(plan, user) {
@@ -88,7 +100,7 @@ function showPaymentModal(plan, user) {
       <button class="main-btn" id="closeModal">Отмена</button>
     </div>
   `;
-  document.body.appendChild(modal);
+  overlays.appendChild(modal);
   document.getElementById('closeModal').onclick = () => modal.remove();
   document.getElementById('payBtn').onclick = () => {
     // Анимация успешной оплаты
@@ -102,7 +114,7 @@ function showPaymentModal(plan, user) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        // Передавайте Telegram initData для проверки подписи на сервере
+  // overlays.appendChild(modal); // уже добавлено выше
         'X-Telegram-InitData': window.Telegram.WebApp.initData || ''
       },
       body: JSON.stringify({ user_id: user.id, plan })
@@ -159,6 +171,14 @@ function loadProfile(user) {
       }
       if (data.orders) {
         const ul = profileScreen.querySelector('.orders-history ul');
+      // Всплывающая подсказка для инфо-иконки
+      const infoIcon = profileScreen.querySelector('.info-icon');
+      if (infoIcon) {
+        infoIcon.addEventListener('mouseenter', () => showTooltip(infoIcon, 'В профиле отображается статус подписки и история заказов.'));
+        infoIcon.addEventListener('mouseleave', hideTooltip);
+        infoIcon.addEventListener('touchstart', () => showTooltip(infoIcon, 'В профиле отображается статус подписки и история заказов.'));
+        infoIcon.addEventListener('touchend', hideTooltip);
+      }
         ul.innerHTML = data.orders.map(o => `<li>${o.date} — ${o.plan} — ${o.price}₽ — ${o.status}</li>`).join('');
       }
     });
@@ -171,6 +191,25 @@ function showToast(message) {
   const toast = document.createElement('div');
   toast.className = 'toast';
   toast.textContent = message;
-  document.body.appendChild(toast);
+  overlays.appendChild(toast);
   setTimeout(() => toast.remove(), 2500);
+}
+
+// Всплывающая подсказка
+function showTooltip(target, text) {
+  let tooltip = document.querySelector('.tooltip');
+  if (!tooltip) {
+    tooltip = document.createElement('div');
+    tooltip.className = 'tooltip';
+    overlays.appendChild(tooltip);
+  }
+  tooltip.textContent = text;
+  const rect = target.getBoundingClientRect();
+  tooltip.style.left = rect.left + window.scrollX + rect.width / 2 + 'px';
+  tooltip.style.top = rect.top + window.scrollY - 32 + 'px';
+  tooltip.classList.add('active');
+}
+function hideTooltip() {
+  const tooltip = document.querySelector('.tooltip');
+  if (tooltip) tooltip.classList.remove('active');
 }

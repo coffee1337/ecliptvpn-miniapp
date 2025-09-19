@@ -139,3 +139,68 @@ body {
     font-size: 1rem;
   }
 }
+
+/* Всплывающие подсказки */
+.tooltip {
+  position: absolute;
+  background: #222a3a;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  box-shadow: 0 2px 12px rgba(0, 230, 255, 0.18);
+  z-index: 3000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s, transform 0.3s;
+}
+.tooltip.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(-8px);
+}
+
+/* Улучшение кнопок */
+.main-btn {
+  position: relative;
+  overflow: hidden;
+}
+.main-btn::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(0,230,255,0.15);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.4s, height 0.4s;
+  z-index: 1;
+}
+.main-btn:active::after {
+  width: 120px;
+  height: 120px;
+}
+
+/* Улучшение карточек тарифов */
+.tariff-card {
+  background: #222a3a;
+  border-radius: 18px;
+  box-shadow: 0 2px 16px rgba(0,230,255,0.08);
+  padding: 18px 12px;
+  margin: 12px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+.tariff-card:hover {
+  box-shadow: 0 6px 32px rgba(0,230,255,0.18);
+  transform: translateY(-2px) scale(1.03);
+}
+.tariff-img {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 8px;
+}
