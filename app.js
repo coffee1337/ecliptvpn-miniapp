@@ -1,3 +1,14 @@
+// Главный экран меню
+async function showMainMenu(user) {
+  app.innerHTML = '';
+  const mainMenu = document.createElement('section');
+  mainMenu.id = 'mainMenu';
+  mainMenu.className = 'screen active';
+  mainMenu.innerHTML = `<h2>Главное меню</h2><p>Добро пожаловать, <b>${user?.first_name || 'Гость'}</b>!</p><button class="main-btn" id="profileBtn">Профиль</button>`;
+  app.appendChild(mainMenu);
+  // Пример перехода в профиль
+  mainMenu.querySelector('#profileBtn').onclick = () => loadProfile(user);
+}
 // Telegram Mini App: EcliptVPN
 const app = document.getElementById('app');
 document.addEventListener('DOMContentLoaded', () => {
